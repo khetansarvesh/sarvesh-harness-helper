@@ -1,0 +1,19 @@
+{
+  "name": "ai-skills-repo",
+  "version": "1.0.0",
+  "description": "AI skills and automation tools",
+  "type": "module",
+  "scripts": {
+    "scan": "python3 skills/job-scan/scripts/scout_specials.py",
+    "scan:dry-run": "python3 skills/job-scan/scripts/scout_specials.py --dry-run",
+    "scan:company": "python3 skills/job-scan/scripts/scout_specials.py --company",
+    "liveness": "node skills/job-scan/scripts/liveness_helpers/check-liveness.mjs",
+    "notion-eval": "python3 scripts/notion/db_applications.py update-eval",
+    "notion-status": "python3 scripts/notion/db_applications.py update-status",
+    "notion-project": "python3 scripts/notion/page_reader.py"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "playwright": "^1.58.1"
+  }
+}
