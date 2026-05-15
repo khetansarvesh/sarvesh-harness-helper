@@ -1,0 +1,18 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "14",
+  "company": "Cohere",
+  "role": "Security Officer - Sovereign AI",
+  "score": 1.4,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34a98a5aae7281daba51ef64aa7b0ec3",
+  "error": null
+}
+```
+
+**Summary:** Score **1.4/5 — DO NOT APPLY.** Despite the "Sovereign AI" label, this is a physical/industrial security compliance role, not an AI engineering position. It requires Canadian citizenship (mandatory legal requirement), Top Secret security clearance, 5+ years in security operations, and Ottawa residency — none of which the candidate meets. Zero of ~10 requirements matched. This was likely a false positive triggered by "Sovereign AI" in the title. Recommend adding "Security Officer" to the title exclusion filter for future scans.
+
+Report saved to `/tmp/eval-batch-14-cohere.md` and registered in Notion.

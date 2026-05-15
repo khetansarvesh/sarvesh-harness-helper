@@ -1,0 +1,26 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "11",
+  "company": "Amazon",
+  "role": "Applied Scientist, Data Center Design Engineering",
+  "score": 1.9,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34a98a5aae7281719439d70d9f1cd9ea",
+  "error": null
+}
+```
+
+**Verdict: 1.9/5 — Do not apply.**
+
+Key reasons:
+- **Two hard domain blockers**: AECO (Architecture, Engineering, Construction) and BIM/CAD/3D geometry are listed as basic qualifications — you have zero coverage in either
+- **Location barrier**: Frankfurt, Germany requires EU work authorization; you're on F-1 OPT in the US
+- **Comp penalty**: German Applied Scientist salaries (~€93K-€146K TC) are significantly below US equivalents ($245K-$653K TC)
+- **North Star misalignment**: Domain-specific ML for building design is far from your agentic AI / LLMOps trajectory
+
+Your ML fundamentals, publications, and GenAI experience are strong — but this role needs someone from the construction/architecture engineering domain. Time is better spent on roles matching your agent systems and LLM platform strengths.
+
+Report saved to `/tmp/eval-batch-11-amazon.md` and registered in Notion.

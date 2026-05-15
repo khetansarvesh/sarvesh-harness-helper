@@ -1,0 +1,16 @@
+Pipeline complete.
+
+```json
+{
+  "status": "completed",
+  "id": "10",
+  "company": "Cohere",
+  "role": "Senior Software Engineer, Agent Infrastructure",
+  "score": 2.9,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/34698a5aae7280d598caceec513fd966",
+  "error": null
+}
+```
+
+**Summary:** Cohere's Agent Infrastructure role scored **2.9/5**. The posting is legitimate (well-funded company, $1.64B raised, actively hiring), but there's a fundamental mismatch: this is a **systems/infrastructure engineering** role (Kubernetes, sandboxes, storage internals, auth boundaries) while your profile is strongest in **ML/agent architecture design**. Your agentic systems experience (ROMA, SERA, Deep Research) maps well to the "what agents need" side, but not to the "build the platform underneath" side. The Senior title is also a stretch at 3 years. Not recommended for active pursuit -- better to target roles where agent *design* (not infra plumbing) is the core requirement.

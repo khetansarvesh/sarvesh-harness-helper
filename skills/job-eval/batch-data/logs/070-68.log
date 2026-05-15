@@ -1,0 +1,24 @@
+Pipeline complete. Here's the final output:
+
+```json
+{
+  "status": "completed",
+  "id": "68",
+  "company": "Scale AI",
+  "role": "Infrastructure Software Engineer, Enterprise GenAI",
+  "score": 2.4,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae72817c8868f0c63e782c3e",
+  "error": null
+}
+```
+
+**Summary:** Score **2.4/5** -- recommend **skip**. Fundamental domain mismatch: the role is infrastructure engineering (Kubernetes, multi-cloud architecture, customer integrations) while your profile is AI/ML research and agent systems. Three hard blockers:
+
+1. **Kubernetes** -- not mentioned anywhere in your profile
+2. **4+ years post-graduation FT experience** -- you have ~2.2 years post-BTech
+3. **Multi-cloud infra architecture** -- your work is ML/AI-focused, not infra
+
+The comp is strong ($179-224K base + equity at $29B valuation), but Scale AI is also in organizational turmoil (CEO departure to Meta, customer losses, layoffs). Application effort is better spent on AI/ML Engineer or ML Platform roles where your agent architecture expertise (ROMA, SERA) is the core requirement.
+
+Report saved to `/tmp/eval-batch-68-scale-ai.md` and registered in Notion.

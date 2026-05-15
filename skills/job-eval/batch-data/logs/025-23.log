@@ -1,0 +1,20 @@
+```json
+{
+  "status": "completed",
+  "id": "23",
+  "company": "METR",
+  "role": "Machine Learning Research Engineer/Scientist",
+  "score": 2.9,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281678360d487a8cd6a76",
+  "error": null
+}
+```
+
+**Evaluation complete.** Key findings:
+
+- **Score: 2.9/5** — Strong comp ($258-341K) but significant gaps in AI safety expertise and frontier model evaluation experience
+- **Legitimacy: Proceed with Caution** — The specific Lever posting has been removed from the API (likely filled/restructured). A similar "Member of Technical Staff, Research" role is currently active
+- **Main gaps:** No AI safety/alignment background, no top-venue ML publications, seniority stretch for new MS grad
+- **Best angle if applying:** Frame ROMA benchmarking + SERA's systematic experiment methodology as proto-capability-evaluation work; apply to the active MTS Research posting instead
+- Report saved to `/tmp/eval-batch-23-metr.md` and synced to Notion

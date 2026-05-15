@@ -1,0 +1,24 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "18",
+  "company": "DeepAware AI",
+  "role": "AI/ML Engineer",
+  "score": 3.2,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281ad8095d09edbe35f16",
+  "error": null
+}
+```
+
+**Summary:** DeepAware AI (YC S25) — AI/ML Engineer scored **3.2/5**. Key findings:
+
+- **Strong on:** Python/PyTorch, distributed training (DDP on A100s), production ML deployment, startup mindset, model benchmarking
+- **Gaps:** Classical RL (MDP/policy gradient for control systems — the core requirement), anomaly detection, energy/data center domain knowledge
+- **Comp:** $130-170K base is below market for SF Bay Area ML roles (score 2/5). Equity package unknown.
+- **North Star misalignment:** Role focuses on RL for physical infrastructure optimization, which diverges from the candidate's agentic AI trajectory
+- **Legitimacy:** Proceed with Caution — legitimate YC S25 company but 2-person team, seed-stage runway risk
+
+Report saved to `/tmp/eval-batch-18-deepaware-ai.md` and registered in Notion.

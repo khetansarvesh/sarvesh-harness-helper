@@ -1,0 +1,16 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "82",
+  "company": "Glean",
+  "role": "Software Engineer, Agentic Runtime",
+  "score": 3.3,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281e9a2b7fd7e4b3c86d5",
+  "error": null
+}
+```
+
+**Summary:** Glean's Agentic Runtime role scores **3.3/5**. The core tension: your agent expertise (ROMA, SERA, model routing, tool calling) is directly relevant to the *domain* this team builds for, but the role's day-to-day is distributed systems infrastructure (gRPC, WebSockets, K8s, circuit-breaking) where your experience is thinner. Strong comp ($170-265K base, potential $300K+ total at $7.2B company), high legitimacy, and excellent north-star alignment (agent research -> agent platform). The main gaps are distributed systems infra patterns and Bay Area relocation. Report saved to `/tmp/eval-batch-82-glean.md` and synced to Notion.

@@ -1,0 +1,23 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "39",
+  "company": "Loopio",
+  "role": "Senior Machine Learning Engineer (Library)",
+  "score": 2.8,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281f0aa2adde21f66e58c",
+  "error": null
+}
+```
+
+**Summary: Loopio - Sr. ML Engineer (Library) - 2.8/5 - DO NOT APPLY**
+
+The technical fit is strong (4.0/5) - the role's NLP, LLM, RAG, embedding pipeline, and agentic components requirements map directly to your SERA, ROMA, Text2SQL, and Deep Research work. However, two dealbreakers tank the score:
+
+1. **Location blocker**: The role is for Loopio's **India Hub** (remote but IST hours 11am-7:30pm). You're in the US on F-1 OPT - this is a hard geographic mismatch.
+2. **Comp mismatch**: India-market compensation (median ~$24K USD, 90th percentile ~$54K USD) is far below US market rates.
+
+Report saved to `/tmp/eval-batch-39-loopio.md` and registered in Notion.

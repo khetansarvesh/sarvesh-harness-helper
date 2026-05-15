@@ -1,0 +1,20 @@
+Pipeline complete. Here's the output:
+
+```json
+{
+  "status": "completed",
+  "id": "17",
+  "company": "arnata",
+  "role": "AI/ML Engineer (Founding Engineer)",
+  "score": 4.0,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae728188a1daf9c218fca968",
+  "error": null
+}
+```
+
+**Summary:** arnata (YC W21) is building autonomous AI workers for logistics -- agents that negotiate freight, coordinate dispatch, and manage workflows via email, phone, and SMS. $6.5M raised March 2026, 15-person team, actively hiring 9 roles.
+
+**Score: 4.0/5** -- Strong technical fit. SERA and ROMA map directly to arnata's multi-channel agent architecture. Only gaps are voice/phone AI (nice-to-have) and logistics domain (learnable). Comp is at-market at the top end ($250K + 0.75% equity) but the equity floor (0.25%) is low for a "founding" title -- negotiate upward.
+
+Report saved to `/tmp/eval-batch-17-arnata.md` and registered in Notion.

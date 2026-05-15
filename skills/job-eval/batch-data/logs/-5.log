@@ -1,0 +1,27 @@
+Evaluation complete. Here's the final output:
+
+```json
+{
+  "status": "completed",
+  "id": "5",
+  "company": "Pinecone",
+  "role": "Staff AI Engineer, Growth",
+  "score": 2.4,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34598a5aae728121ba8df3a153714c09",
+  "error": null
+}
+```
+
+---
+
+**Summary: 2.4/5 — Not Recommended**
+
+Key findings:
+- **Posting expired** (April 16, 2026) and Pinecone had recent layoffs across departments
+- **Structural mismatch** — the role is growth engineering (signup funnels, marketing automation, A/B testing) not AI/ML engineering. The candidate's strengths (agent architectures, ML research, deep AI systems) are orthogonal to what this role needs
+- **Hard blockers**: No JavaScript/TypeScript, no growth engineering track record, no marketing automation (HubSpot/Salesforce)
+- **Strong matches** exist only in AI/ML APIs and vector database experience (Pinecone itself is listed in skills)
+- $210K base + equity in NYC is at-market but not compelling given the mismatch
+
+Full report saved to `/tmp/eval-batch-5-pinecone.md` and registered in [Notion](https://www.notion.so/Report-34598a5aae728121ba8df3a153714c09).

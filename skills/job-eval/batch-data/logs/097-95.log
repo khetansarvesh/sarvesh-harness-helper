@@ -1,0 +1,22 @@
+Pipeline complete. Here's the result:
+
+```json
+{
+  "status": "completed",
+  "id": "95",
+  "company": "Stability AI",
+  "role": "Generative AI Inference Engineer",
+  "score": 1.8,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae72819eb38ce890f81715cf",
+  "error": null
+}
+```
+
+**Summary:** Score **1.8/5 -- Do not apply.** Three hard blockers:
+
+1. **Experience gap:** Role requires 7+ years; candidate has 3+
+2. **Domain mismatch:** Role is diffusion model inference infrastructure; candidate's strength is agentic AI/NLP systems
+3. **Technical stack gap:** Triton, TensorRT, NVIDIA Nsight, Kubernetes at inference scale -- none present in profile
+
+The role is a senior inference infra position for serving Stable Diffusion models at scale. The candidate's trajectory toward agentic AI systems does not align. Report saved to `/tmp/eval-batch-95-stability-ai.md` and registered in Notion.

@@ -1,0 +1,22 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "60",
+  "company": "Microsoft",
+  "role": "Senior Machine Learning Research Engineer",
+  "score": 3.8,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae728177a3eece52a6310842",
+  "error": null
+}
+```
+
+**Summary:**
+
+- **Score: 3.8/5** -- Strong CV match on ML lifecycle, Python, PyTorch, research output (patent, SOTA results). Main gaps: slight experience shortfall for "Senior" level, no direct ONNX experience, and no responsible AI work.
+- **Legitimacy: Proceed with Caution** -- JD couldn't be fully fetched (Microsoft's JS-rendered portal). However, AI teams are explicitly exempt from Microsoft's current hiring freeze, and the role is technically specific (not a ghost posting).
+- **Key strengths**: Patent holder, SOTA agent research (ROMA 10%), systematic experimentation (SERA 3 controlled experiments), team leadership ($1M+ funding).
+- **Strategy**: Frame 3 years at Piramal as high-density senior experience. Lead with research-to-production narrative.
+- **Report saved** to `/tmp/eval-batch-60-microsoft.md` and registered in Notion.

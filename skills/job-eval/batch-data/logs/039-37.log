@@ -1,0 +1,16 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "37",
+  "company": "OpenAI",
+  "role": "Research Engineer / Research Scientist, Post-Training",
+  "score": 3.4,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281338769d887fb45c346",
+  "error": null
+}
+```
+
+**Summary:** OpenAI Post-Training scored **3.4/5**. The role is a significant stretch — OpenAI's Post-Training team typically hires PhD researchers with deep RL experience. Your profile is strong on ML engineering (SERA experiments, evaluator building, production shipping) but has meaningful gaps in: top-venue publications, large-scale training experience (thousands of GPUs), and novel RL research (vs paper reimplementation). Compensation is top-of-market ($295K-$555K base + equity). Worth applying as a long-shot — lead with SERA's experiment-driven methodology and the GRPO implementation as your closest post-training experience. Report saved to `/tmp/eval-batch-37-openai.md` and registered in Notion.

@@ -1,0 +1,18 @@
+Evaluation complete.
+
+```json
+{
+  "status": "completed",
+  "id": "21",
+  "company": "Sesame",
+  "role": "Research Engineer - Computer Vision ML",
+  "score": 2.3,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281b8a987cde4a9070805",
+  "error": null
+}
+```
+
+**Summary:** Sesame is an excellent company (Oculus founders, $250M Series B from Sequoia, building AI smart glasses) with top-of-market comp ($190K-$320K). However, this role is a **fundamental domain mismatch** — it requires deep 3D computer vision expertise (gaze tracking, SLAM, multi-camera data, embedded deployment) while your strengths are in NLP, agentic AI, and LLM systems. The CV paper implementations (YOLO, CLIP, Diffusion Transformers) show ML breadth but are 2D and academic, not production 3D CV. **Score: 2.3/5 — not recommended to apply.**
+
+Report saved to `/tmp/eval-batch-21-sesame.md` and registered in Notion.

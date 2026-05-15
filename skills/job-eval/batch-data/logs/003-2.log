@@ -1,0 +1,24 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "2",
+  "company": "ComplyFirst",
+  "role": "AI Data Scientist",
+  "score": 3.6,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/34698a5aae72802c891efe42f3c0dfee",
+  "error": null
+}
+```
+
+**Summary:**
+
+- **Score: 3.6/5** -- Strong technical match (RAG, LLMs, PyTorch, production deployment) but dragged down by undisclosed compensation at an early-stage UK startup, location/visa complications, and no direct compliance domain experience.
+- **Archetype:** AI Platform / LLMOps + Agentic
+- **Legitimacy:** Proceed with Caution -- company is real (Crunchbase, PitchBook, named CEO) but limited public info on funding/team size.
+- **Key strength:** 3+ years at Piramal (financial services) + full-lifecycle production experience maps well to the "not just research" requirement.
+- **Key risk:** UK-based role vs US F-1 visa status. No salary range disclosed. Early-stage with likely below-market comp.
+- **Report saved:** `/tmp/eval-batch-2-complyfirst.md`
+- **Notion updated:** [Page link](https://www.notion.so/34698a5aae72802c891efe42f3c0dfee)

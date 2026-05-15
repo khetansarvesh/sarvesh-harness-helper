@@ -1,0 +1,25 @@
+Evaluation complete.
+
+```json
+{
+  "status": "completed",
+  "id": "58",
+  "company": "Microsoft",
+  "role": "Applied AI Engineer II",
+  "score": 4.2,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281d8ad72e918c5a0bd81",
+  "error": null
+}
+```
+
+**Summary:**
+
+- **Score: 4.2/5** — Near-perfect CV match (4.5/5) across all core requirements: multi-agent architectures, RAG, knowledge graphs, foundation models, prompt engineering, Python. Only gap is C# (nice-to-have).
+- **Archetype:** AI Platform / LLMOps + Agentic / Automation
+- **Comp:** $101K–$215K base (L61-62), total comp ~$180K–$260K with RSUs. At market, not top-quartile.
+- **Legitimacy: Proceed with Caution** — Posting is ~14 months old with a March 2025 deadline, but a similar role (job 1808407) is also active. AI teams are explicitly exempt from Microsoft's March 2026 hiring freeze.
+- **Key strength:** Every JD technical requirement maps to a concrete project (ROMA, SERA, Deep Research, Text2SQL).
+- **Key risk:** Posting may be expired. Recommend also targeting the newer posting.
+
+Report saved to `/tmp/eval-batch-58-microsoft.md` and registered in Notion.

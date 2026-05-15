@@ -1,0 +1,23 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "55",
+  "company": "Apple",
+  "role": "AI/ML - Machine Learning Research Engineer, Machine Translation",
+  "score": 2.3,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281b39194d91c96c38ee4",
+  "error": null
+}
+```
+
+**Summary:** Score **2.3/5 — Not recommended.** Two hard blockers:
+
+1. **No machine translation experience** — the role requires neural MT, seq2seq, encoder-decoder expertise. Your profile is agentic AI / RAG / multi-agent systems.
+2. **Posting is dead (404)** — the specific listing is no longer available, though Apple's MT team has other active postings.
+
+Your strengths (ROMA, SERA, multi-agent orchestration, production LLM deployment) are wasted in a specialized MT research role. If Apple is a target, look at AI Platform, Apple Intelligence, or Siri teams where agentic AI experience is directly relevant.
+
+Report saved to `/tmp/eval-batch-55-apple.md` and synced to [Notion](https://www.notion.so/Report-34798a5aae7281b39194d91c96c38ee4).

@@ -1,0 +1,16 @@
+Evaluation complete.
+
+```json
+{
+  "status": "completed",
+  "id": "71",
+  "company": "Scale AI",
+  "role": "Evals Engineer, Applied AI",
+  "score": 4.2,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae728135bff5e7ff6b997aac",
+  "error": null
+}
+```
+
+**Summary:** Scale AI Evals Engineer scored **4.2/5**. Strong CV match (9/10 requirements hit) — the LLM-as-a-Judge work at Strategy and SERA's systematic evaluation methodology are direct hits for this role. Only gap is no top-4 ML venue publications (nice-to-have). Comp is strong at $216K-$270K base + equity. Legitimacy: High Confidence — evaluation is core to Scale AI's business. Report saved to `/tmp/eval-batch-71-scale-ai.md` and registered in Notion.

@@ -1,0 +1,23 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "9",
+  "company": "Cohere",
+  "role": "Senior Research Scientist, Cohere Labs",
+  "score": 2.4,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/34698a5aae72809081aafec27912c365",
+  "error": null
+}
+```
+
+**Summary:** Score **2.4/5** — **Do not apply.** Two hard blockers:
+
+1. **PhD required** — the role explicitly requires a PhD with a strong publication record at top venues. MS + 3 papers (none at NeurIPS/ICML/ACL) won't pass the screen.
+2. **UK work authorization** — London-based role, candidate is on US F-1 OPT visa.
+
+The technical overlap on agentic systems, efficiency, multimodality, and reasoning is genuinely strong — but this is a pure research-track position, not applied AI engineering. Better to target Applied AI Scientist or ML Engineer roles at Cohere instead.
+
+Report saved to `/tmp/eval-batch-9-cohere.md` and registered in Notion.

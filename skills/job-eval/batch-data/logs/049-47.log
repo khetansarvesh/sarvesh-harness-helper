@@ -1,0 +1,23 @@
+Pipeline complete. Here's the result:
+
+```json
+{
+  "status": "completed",
+  "id": "47",
+  "company": "Hugging Face",
+  "role": "Open-Source Machine Learning Engineer",
+  "score": 3.6,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281f08d23fdd8b21ae592",
+  "error": null
+}
+```
+
+**Summary:**
+- **Score: 3.6/5** — Strong ML skills and HF ecosystem usage, but the main gap is no direct contributions to HF's core libraries (Transformers, Datasets, Accelerate). The candidate is a power *user*, not yet a *contributor*.
+- **Archetype:** AI Platform / LLMOps
+- **Legitimacy:** High Confidence — HF layoffs were in GTM/consulting, not engineering. Role is core to their business.
+- **Key gaps:** (1) No PRs to HF libraries, (2) limited large-scale OSS community management experience
+- **Mitigation:** Submit a PR to `transformers` before applying; frame paper implementations (DeepSeek-R1) as proof of deep library-level understanding
+- **Comp:** $118K-$165K base + equity at a $4.5B valuation company. At market for startup, below Big Tech.
+- **Report:** `/tmp/eval-batch-47-huggingface.md`

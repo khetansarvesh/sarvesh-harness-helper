@@ -1,0 +1,25 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "53",
+  "company": "Apple",
+  "role": "AIML Sr. ML Engineer, NL Response Generation (AKI)",
+  "score": 2.9,
+  "legitimacy": "Suspicious",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281578d75fa9aedd8cad5",
+  "error": null
+}
+```
+
+**Summary:** Score **2.9/5** — not recommended to pursue this specific posting.
+
+**Key findings:**
+- **Posting is dead** — URL returns 404, multiple sibling postings also expired. Likely filled or cancelled.
+- **CV gaps:** No search/IR/recommendation experience (core to this role), no Go, no personalization, and slightly under the 4-year YoE threshold.
+- **Strengths:** Strong LLM/NLP skills, PyTorch, LLM evaluation (94% human agreement), production deployments, team leadership + patent.
+- **Comp was good:** ICT4 total ~$341K, even ICT3 at ~$245K is competitive.
+- **Recommendation:** Monitor Apple AKI for future openings at the **ICT3/ML Engineer level**, which better matches experience level. The team is real and actively hiring, but this specific req is closed.
+
+Report saved to `/tmp/eval-batch-53-apple.md` and registered in Notion.

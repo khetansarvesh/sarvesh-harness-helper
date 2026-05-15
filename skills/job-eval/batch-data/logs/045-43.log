@@ -1,0 +1,26 @@
+Pipeline complete. Here's the result:
+
+```json
+{
+  "status": "completed",
+  "id": "43",
+  "company": "Triiodide",
+  "role": "Machine Learning Engineer",
+  "score": 2.9,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae72819481b5f19d66760338",
+  "error": null
+}
+```
+
+**Summary:** Triiodide is a 5-person bootstrapped gaming studio behind *Backrooms: Escape Together* (Steam top 100). The ML Engineer role focuses on **generative procedural environments, RL creature behavior, and RLHF from player telemetry** -- a gaming/embodied AI domain.
+
+**Score: 2.9/5** -- Moderate match. Your ML fundamentals transfer (PyTorch, Diffusion Transformers, RL/GRPO, inference optimization), but the role sits in a different domain than your trajectory. Key gaps:
+- No robotics RL (MuJoCo, Isaac Lab)
+- No gaming/procedural generation experience
+- No JAX
+- Requires relocation to Cape Cod, MA (75% in-person)
+
+**Recommendation:** Not a priority application unless you're genuinely interested in pivoting to gaming ML. Your strongest bridge is the Diffusion Transformer + inference optimization work, but the domain gap and relocation requirement make this a stretch.
+
+Report saved to `/tmp/eval-batch-43-triiodide.md` and synced to Notion.

@@ -1,0 +1,16 @@
+Evaluation complete.
+
+```json
+{
+  "status": "completed",
+  "id": "57",
+  "company": "Amazon",
+  "role": "Data Scientist, AWS Quick Data",
+  "score": 2.9,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae72816cadf1fe0713fbfd1b",
+  "error": null
+}
+```
+
+**Summary:** Scored **2.9/5**. The candidate is technically qualified (Python, SQL, ML, evaluation frameworks) but this role is a poor career fit — it focuses on evaluation dataset creation, human annotation management, and synthetic data generation, not agent building. Key gaps: no annotation management experience, no dedicated synthetic data generation work, no responsible AI experience. Amazon's active layoffs (16K-30K in 2026, AWS teams affected) add further risk. Report saved to `/tmp/eval-batch-57-amazon.md` and registered in Notion.

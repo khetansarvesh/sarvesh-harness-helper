@@ -1,0 +1,10 @@
+**Evaluation complete.** Score: **2.9/5** — Anthropic's Vision Research role is a reach application.
+
+**Key findings:**
+- **Hard gap:** 7+ years required vs ~3.5 years available. Core requirements (production VLM training, large-scale dataset construction) are unmet.
+- **Strengths:** Agentic systems (ROMA, SERA, Deep Research), evaluation methodology, multimodal architecture (m-ROMA), and distributed training with PyTorch DDP.
+- **Comp:** Top-of-market ($350K-$850K base + equity at $61.5B valuation). Score 5/5.
+- **Legitimacy:** High Confidence — Anthropic is actively hiring, no layoffs, role directly supports Claude's product roadmap.
+- **Recommendation:** Skip this specific role. Target Anthropic's more junior openings or revisit after 3-4 more years of focused vision/multimodal research.
+
+Report saved to `/tmp/eval-batch-3-anthropic.md` and registered in [Notion](https://www.notion.so/Report-34a98a5aae7281b282a5cfb29844f191).

@@ -1,0 +1,29 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "32",
+  "company": "OpenAI",
+  "role": "Data Scientist, Product",
+  "score": 2.9,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae72811a819cffa3008e8eae",
+  "error": null
+}
+```
+
+---
+
+**Summary: OpenAI — Data Scientist, Product → 2.9/5 (Not Recommended)**
+
+This is fundamentally a **role mismatch**. The position is a product analytics / experimentation role (A/B tests, KPIs, dashboards, metrics culture), not an AI/ML engineering role. Your strengths in agent systems (ROMA, SERA), LLM research, and ML engineering align with the *preferred* qualifications but miss 4 of 6 *core* requirements:
+
+- **Hard blockers:** No A/B testing experience, no product metric/KPI definition, only 3.5 vs 5+ years required
+- **Strong fits:** SQL/Python, NLP/LLM/GenAI experience (preferred), programming depth (preferred)
+
+Compensation is top-of-market ($230K-$385K base + equity at $300B+ valuation). OpenAI is actively hiring (growing to 8,000 headcount). Posting is legitimate.
+
+**Recommendation:** Skip this role. Target AI/ML Engineering, Applied Research, or AI Platform roles at OpenAI where ROMA/SERA/Deep Research experience maps directly to core requirements.
+
+Report saved to `/tmp/eval-batch-32-openai.md` and registered in Notion.

@@ -1,0 +1,18 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "36",
+  "company": "OpenAI",
+  "role": "RE/RS - Foundations, Search",
+  "score": 2.4,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae72819397a8d3fa9d87934a",
+  "error": null
+}
+```
+
+**Summary:** Score **2.4/5** — significant domain mismatch. The role demands deep embedding/retrieval research expertise (contrastive learning, metric learning, embedding training objectives) which are hard-blocker gaps. Your strengths in agent architecture and applied RAG are adjacent but insufficient for OpenAI's Foundations Research team. Comp is exceptional ($445K-$555K base + equity) but the role targets PhD-level researchers in a specific subdomain. Recommend deprioritizing unless applying for brand/network value.
+
+Report saved to `/tmp/eval-batch-36-openai.md` and registered in Notion.

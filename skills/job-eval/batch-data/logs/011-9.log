@@ -1,0 +1,28 @@
+Notion updated. Here's the final output:
+
+```json
+{
+  "status": "completed",
+  "id": "9",
+  "company": "Cohere",
+  "role": "Applied AI Engineer - Agentic Workflows",
+  "score": 4.4,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34a98a5aae72816fb8b0c209f544fc4f",
+  "error": null
+}
+```
+
+**Summary:** Cohere's Applied AI Engineer role scored **4.4/5** -- one of the strongest matches in this batch.
+
+| Dimension | Score |
+|-----------|-------|
+| CV Match | 4.5 -- direct hit on agentic architectures (ReAct, LangGraph, RAG, evaluation frameworks) |
+| North Star | 5.0 -- production agents at an AI-native pre-IPO company |
+| Comp | 4.0 -- estimated $200K-$360K TC with meaningful equity upside ($7B valuation, IPO path) |
+| Culture | 4.0 -- remote-flexible, 6 weeks PTO, research-oriented |
+| Red Flags | 4.0 -- minor YoE stretch, small 2024 layoff was non-concerning |
+
+**Key strengths:** SERA (40+ tool agent, 50% latency cut), ROMA (SOTA on SEAL-0), Deep Research evaluator (94% human agreement) map directly to every core JD requirement. **Main gap:** enterprise customer-facing years (mitigated by Piramal stakeholder management and Strategy internship).
+
+Report saved to `/tmp/eval-batch-9-cohere.md` and registered in Notion.

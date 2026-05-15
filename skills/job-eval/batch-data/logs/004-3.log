@@ -1,0 +1,18 @@
+Pipeline complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "3",
+  "report_num": "004",
+  "company": "ElevenLabs",
+  "role": "Research Engineer",
+  "score": 3.2,
+  "legitimacy": "High Confidence",
+  "pdf": null,
+  "report": "applications_database/reports/004-elevenlabs-2026-04-16.md",
+  "error": null
+}
+```
+
+**Score: 3.2/5** — Key takeaway: Strong ML engineering and research fundamentals (data pipelines, model training, evaluation, publications) but a **critical domain gap in audio/TTS**. The JD explicitly requires "extensive background in exploratory research... particularly in audio and text-to-speech domains." Your Diffusion Transformer and generative model work is adjacent, but this is a speech-first research role at a voice AI company. Worth applying if you're genuinely interested in pivoting to speech synthesis, but expect the TTS gap to be the main interview hurdle.

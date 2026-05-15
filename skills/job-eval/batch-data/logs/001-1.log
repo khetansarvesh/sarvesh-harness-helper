@@ -1,0 +1,27 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "1",
+  "company": "Capital One",
+  "role": "Applied Researcher I (AI Foundations, LLM Core and Agentic AI)",
+  "score": 2.8,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/34698a5aae7280bf8f7debe6ab71f9e3",
+  "error": null
+}
+```
+
+---
+
+**Summary:** Score **2.8/5** -- not recommended to prioritize.
+
+Key findings:
+- **Core gap:** The role wants a PhD-level researcher with LLM pre-training experience at 10B+ scale and top-tier venue publications. Sarvesh's strength is applied agentic AI and production systems, not foundation model training research.
+- **What matches:** MS+3yr satisfies the minimum, strong PyTorch/AWS/HuggingFace stack, ROMA SOTA result, patent, and production deployment experience.
+- **Comp is strong:** $238K-$272K base in NYC + bonuses/LTI.
+- **Legitimacy concern:** Capital One is conducting Discover merger layoffs (1,139 positions) and there are reports of a soft hiring freeze. The AI Foundations team appears unaffected, but macro pressure exists.
+- **Recommendation:** Skip unless specifically interested in pivoting toward foundation model research. The role's core requirements (pre-training at scale, top-tier pubs) are hard gaps, not framing issues.
+
+Report saved to `/tmp/eval-batch-1-capital-one.md` and registered in Notion.

@@ -1,0 +1,25 @@
+Evaluation complete. Here's the final output:
+
+```json
+{
+  "status": "completed",
+  "id": "4",
+  "company": "Cohere",
+  "role": "Applied AI Engineer – Agentic Workflows",
+  "score": 4.4,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34598a5aae7281ac8569fa6fdbda226f",
+  "error": null
+}
+```
+
+**Summary: Cohere — Applied AI Engineer, Agentic Workflows — 4.4/5**
+
+- **Archetype:** Agentic / Automation + AI Solutions Architect
+- **Key strengths:** Exceptional technical match — SERA (40+ tool agent architecture), ROMA (SOTA recursive agent), RAG expertise (patented Text2SQL), and rigorous evaluation framework experience map directly to every core JD requirement.
+- **Gaps:** Minor — no TypeScript (Python is primary), limited enterprise customer-facing experience (mitigated by $1M stakeholder pitch at Piramal), distributed team leadership at scale is partial.
+- **Comp estimate:** $200K–$280K TC range for mid-to-senior in SF. Strong benefits (6 weeks vacation, remote-flexible).
+- **Legitimacy:** High Confidence — $5.5B valuation, active hiring, detailed JD.
+- **Recommendation:** Apply with confidence. SERA is the hero story — it demonstrates every skill they're looking for.
+
+Report saved to `/tmp/eval-batch-4-cohere.md` and registered in Notion.

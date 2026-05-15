@@ -1,0 +1,21 @@
+All steps complete. Here's the final output:
+
+```json
+{
+  "status": "completed",
+  "id": "24",
+  "company": "Mistral AI",
+  "role": "Applied AI, Forward Deployed Machine Learning Engineer - EMEA",
+  "score": 3.8,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281b29b5afd039174bbe6",
+  "error": null
+}
+```
+
+**Summary:** Mistral AI FDE role scored **3.8/5**. Strong technical match (4.5/5) on all core requirements — LLM fine-tuning, RAG, agentic systems, Python/PyTorch. Two key considerations pull the score down:
+
+- **Comp (2.5/5):** European salaries are 30-40% below US equivalents for AI roles. Paris base likely €80K-€130K vs $150K-$200K+ in the US.
+- **Red flags (3.0/5):** EU work authorization is the main blocker — needs visa sponsorship to work in France. Onsite-only in Paris requires relocation.
+
+The role itself is legitimate (High Confidence) — Mistral is in aggressive growth mode ($13.7B valuation, 146 open roles, targeting €1B revenue). Report saved to `/tmp/eval-batch-24-mistral-ai.md` and registered in Notion.

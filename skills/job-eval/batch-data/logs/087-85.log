@@ -1,0 +1,20 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "85",
+  "company": "Glean",
+  "role": "Product Design Lead, AI Products",
+  "score": 1.4,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281369024f9138bd47afc",
+  "error": null
+}
+```
+
+**Summary:** Score **1.4/5 — Do not apply.** This is a **Product Design Lead** role requiring 10+ years of UX/product design experience and a design portfolio. It's not an AI engineering role — it's a design leadership role that happens to be in the AI product space. Four hard-blocker gaps (design experience, design portfolio, UX skills, design team management) make this fundamentally mismatched regardless of your strong LLM/agent systems expertise.
+
+Glean itself is an excellent company ($7.2B valuation, $200M+ ARR, Sequoia-backed). If they post **AI Engineering**, **ML Platform**, or **Agentic AI** roles, those would be strong targets — your ROMA, SERA, and multi-agent work maps directly to their platform.
+
+Report saved to `/tmp/eval-batch-85-glean.md` and synced to Notion.

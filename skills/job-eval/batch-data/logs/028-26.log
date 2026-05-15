@@ -1,0 +1,26 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "26",
+  "company": "Nebius",
+  "role": "Senior / Staff ML Engineer (LLMs and Agentic Systems)",
+  "score": 2.6,
+  "legitimacy": "Suspicious",
+  "notion_url": "https://www.notion.so/Report-34798a5aae728126a7f1c4ef89bda781",
+  "error": null
+}
+```
+
+**Key findings:**
+
+- **Score: 2.6/5** — Not recommended to apply
+- **Legitimacy: Suspicious** — Posting was deactivated July 8, 2025 (~10 months ago). The Greenhouse URL redirects to the careers page.
+- **Critical gaps:** JAX is a hard requirement (candidate uses PyTorch only); multi-node training limited to 4 A100s (role needs 100s+); role trains models, candidate builds agent systems
+- **Location mismatch:** Amsterdam/Europe role, candidate on F-1 OPT in the US — would need European visa sponsorship
+- **Comp:** Amsterdam €105K-163K is significantly below US market for Senior/Staff ML roles
+
+**Recommendation:** Skip this posting. If interested in Nebius, check the active listing (job ID 4704805101) at [careers.nebius.com](https://careers.nebius.com/).
+
+Report saved to `/tmp/eval-batch-26-nebius.md` and registered in Notion.

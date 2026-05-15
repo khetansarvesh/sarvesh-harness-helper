@@ -1,0 +1,18 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "34",
+  "company": "OpenAI",
+  "role": "Research Scientist / Research Engineer — Early Career Cohort",
+  "score": 3.2,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae72810da272ed70d2935b68",
+  "error": null
+}
+```
+
+**Summary:** Score **3.2/5** — this is a **long shot**. The role explicitly targets competition winners (IMO, Putnam, ICPC) and mathematical prodigies. Your strengths in production agent systems (ROMA, SERA), experiment-driven research, and published work are legitimate but don't match the core selection filter. The comp is outstanding ($295K base + OpenAI equity), and the posting is legitimate (OpenAI growing to 8K employees).
+
+**Recommendation:** Apply only if the upside justifies the effort. Prioritize OpenAI's standard Research Engineer or Applied Research roles instead — those would be a much stronger fit for your profile.

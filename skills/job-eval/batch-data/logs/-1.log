@@ -1,0 +1,27 @@
+Pipeline complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "1",
+  "company": "Vapi",
+  "role": "Agent Engineer",
+  "score": 3.4,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34598a5aae72819c81e4f2bc2f1ca919",
+  "error": null
+}
+```
+
+### Summary
+
+**Vapi — Agent Engineer | 3.4/5 | High Confidence**
+
+**Key findings:**
+- **Strong fit:** Agent architecture expertise (SERA, ROMA, Deep Research) maps directly to Vapi's core product
+- **Critical gaps:** Role requires 5+ years in solutions architecture / pre-sales / consulting — you have 3 years of engineering with no customer-facing experience
+- **Location blocker:** SF hybrid (3-5 days/week) requires relocation from College Park, MD
+- **Comp:** $160-180K + equity + commission — fair for your experience level but below SF market for the stated seniority
+- **Voice AI domain:** No SIP/WebRTC/CPaaS experience (nice-to-have but notable gap)
+
+**Verdict:** Strong technical alignment, but this is fundamentally a customer-facing solutions role with a hard 5+ YOE requirement. Worth applying only if willing to relocate to SF and prepared to address the experience gap head-on. Report saved to Notion.

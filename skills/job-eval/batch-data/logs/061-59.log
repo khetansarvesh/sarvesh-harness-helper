@@ -1,0 +1,16 @@
+Report saved and Notion updated.
+
+```json
+{
+  "status": "completed",
+  "id": "59",
+  "company": "Microsoft",
+  "role": "Research Scientist - Responsible & OpenAI Research (ROAR)",
+  "score": 3.0,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281febb24ec41003e8454",
+  "error": null
+}
+```
+
+**Summary:** Scored **3.0/5**. Strong ML/NLP/CV fundamentals match the technical stack, but the core domain requirement — Responsible AI, fairness, content safety — is a hard gap with no direct experience or publications. The Azure hiring freeze (March 2026) adds timing risk. This is a reach application that would likely need a referral to advance past resume screening. Report saved to `/tmp/eval-batch-59-microsoft.md` and Notion updated.

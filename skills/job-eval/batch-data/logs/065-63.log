@@ -1,0 +1,26 @@
+Evaluation complete. Here's the result:
+
+```json
+{
+  "status": "completed",
+  "id": "63",
+  "company": "Meta",
+  "role": "AI Research Scientist, VLM (Vision Language Models)",
+  "score": 2.8,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281c4aeeceb8c4efb70d6",
+  "error": null
+}
+```
+
+**Key findings:**
+
+- **Score: 2.8/5** -- Two hard blockers make this role unrealistic:
+  1. **PhD required** -- you have an MS. Meta Research Scientist roles strictly require a PhD.
+  2. **First-author publications at top-tier venues** (NeurIPS, CVPR, ICML, etc.) -- your publications are strong but not at these specific venues.
+
+- **Legitimacy: Proceed with Caution** -- The posting is 18 months old, Meta is cutting 8,000 jobs starting May 20 (including 600 FAIR researchers), and the AI division was restructured around Superintelligence Labs.
+
+- **Comp is excellent** (5/5) -- $305K-$581K total comp, but inaccessible given the blockers.
+
+- **Recommendation:** Skip this role. Instead search for Meta **Research Engineer**, **ML Engineer**, or **AI Engineer** positions where your MS + strong project portfolio (ROMA, SERA, m-ROMA) is a competitive advantage. Report saved at `/tmp/eval-batch-63-meta.md`.

@@ -1,0 +1,23 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "30",
+  "company": "OpenAI",
+  "role": "Data Scientist, Infrastructure",
+  "score": 2.9,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281bc8496ecf25e100340",
+  "error": null
+}
+```
+
+**Summary:** Score **2.9/5** -- strong company, wrong role. Key issues:
+
+- **Experience gap:** Role requires 5+ years, candidate has 3+
+- **Domain mismatch:** This is an infrastructure analytics/BI role (capacity planning, compute utilization dashboards, FLOPS optimization). Candidate's strengths are in AI/ML engineering and agentic systems -- a fundamentally different career track
+- **What matches:** SQL/Python proficiency (strong), LLM/GenAI experience (preferred qual), metrics design (SERA tool efficiency metric, LLM evaluator)
+- **Comp is excellent** ($230K-$385K base + OpenAI equity) but irrelevant given the fit gap
+
+Report saved to `/tmp/eval-batch-30-openai.md` and synced to Notion.

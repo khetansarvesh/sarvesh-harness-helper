@@ -1,0 +1,16 @@
+Evaluation complete. Report saved and Notion updated.
+
+```json
+{
+  "status": "completed",
+  "id": "56",
+  "company": "Apple",
+  "role": "Machine Learning Engineer, Search & Knowledge Platforms",
+  "score": 3.9,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281ba8ea5ffc8ce2df915",
+  "error": null
+}
+```
+
+**Summary:** Apple ML Engineer for Siri/Apple Intelligence scored **3.9/5**. Strong match on LLM fine-tuning, applied research, and NLP system-building. Main gap is traditional search/IR and entity linking, but adjacent experience (SERA embedding-based retrieval, Text2SQL knowledge graphs) bridges well. Comp is at market ($147K-$272K base, ~$220K-$280K total Year 1). Apple is actively hiring for AI — high-confidence legitimate posting. Report at `/tmp/eval-batch-56-apple.md`, Notion row updated.

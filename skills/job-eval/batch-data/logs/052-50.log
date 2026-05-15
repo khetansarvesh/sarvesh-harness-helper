@@ -1,0 +1,27 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "50",
+  "company": "Salesforce",
+  "role": "LMTS Machine Learning Engineer",
+  "score": 3.2,
+  "legitimacy": "Proceed with Caution",
+  "notion_url": "https://www.notion.so/Report-34798a5aae728131a396e671a9e3f8b4",
+  "error": null
+}
+```
+
+**Summary:**
+
+- **Score: 3.2/5** — Decent technical match but significant level gap
+- **Archetype:** AI Platform / LLMOps + Agentic
+- **Key strength:** Agent + ML integration experience maps directly to Salesforce Agentforce direction. Strong production deployment track record.
+- **Key concern:** LMTS = Lead level (7-12 YoE typical) vs candidate's 3+ YoE. Likely down-leveled to SMTS at offer stage.
+- **Legitimacy:** Proceed with Caution — posting is fresh (13 days old) and specific, but Salesforce cut ~1,000 roles in early 2026 including some Agentforce team members.
+- **Comp:** $207K-$286K base (NYC), $287K-$308K total comp at LMTS. Strong even if down-leveled.
+- **Report saved to:** `/tmp/eval-batch-50-salesforce.md`
+- **Notion updated:** [Report page](https://www.notion.so/Report-34798a5aae728131a396e671a9e3f8b4)
+
+No cover letter or draft application answers generated (score < 4.5).

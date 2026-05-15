@@ -1,0 +1,16 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "41",
+  "company": "Orchard Robotics",
+  "role": "Machine Learning Engineer",
+  "score": 3.4,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281fba4f4da795a7d61ef",
+  "error": null
+}
+```
+
+**Summary:** Orchard Robotics ML Engineer scored **3.4/5**. Strong technical match on ML infrastructure, PyTorch, data pipelines, MLOps, and CV fundamentals (all ✅). Two gaps: no Kubernetes or NVIDIA Jetson edge deployment experience (both nice-to-haves). Main concerns are **career alignment** (this is CV infra at an agtech startup vs your agentic AI trajectory) and **below-market comp** ($135K-$210K base in SF, though 0.1-0.25% equity at a Series A adds upside). Posting legitimacy is high — well-funded ($25M+, General Catalyst), actively hiring 15+ roles, no layoff signals. Report saved to `/tmp/eval-batch-41-orchard-robotics.md` and registered in Notion.

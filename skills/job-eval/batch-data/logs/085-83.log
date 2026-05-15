@@ -1,0 +1,18 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "83",
+  "company": "Glean",
+  "role": "Senior/Staff Applied Scientist",
+  "score": 2.8,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281d3a181fa711470f4ab",
+  "error": null
+}
+```
+
+**Summary:** Glean is an excellent company ($7.2B valuation, well-funded, AI-first), but this role scored **2.8/5** due to a fundamental skill mismatch. The position is centered on **A/B experimentation platforms, statistical methods, and product KPI dashboarding** -- which are hard-blocker gaps in the profile. The candidate's strengths (agent architecture, LLM systems, ML engineering) only partially map to the LLM evaluation component of the role, which is just one piece. The Senior/Staff seniority level is also a stretch. Recommend **passing** unless the candidate wants to pivot toward applied statistics/experimentation.
+
+Report saved to `/tmp/eval-batch-83-glean.md` and registered in Notion.

@@ -1,0 +1,21 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "89",
+  "company": "Glean",
+  "role": "Machine Learning Engineer, AI Assistant & Autonomous AI Agents",
+  "score": 3.2,
+  "legitimacy": "High Confidence",
+  "notion_url": "https://www.notion.so/Report-34798a5aae7281c095efdad8bdf2f9e8",
+  "error": null
+}
+```
+
+**Summary:** Glean's ML Engineer role scores **3.2/5**. The agentic AI match is excellent — ROMA, SERA, and Deep Research map directly to the job's core mission. However, two hard gaps hold the score back:
+
+1. **Staff/Principal requirement** — JD explicitly asks for 2+ years at Staff+ level. Candidate has never held the title, though project scope is Staff-equivalent.
+2. **5+ years ML experience** — Candidate has ~4 years total. Close but short.
+
+The role is a **stretch apply**. Glean may consider at Senior level if the agentic AI depth impresses them. Comp is strong ($240K-$300K base + equity at a $4.6B+ company). Report saved to `/tmp/eval-batch-89-glean.md` and registered in Notion.

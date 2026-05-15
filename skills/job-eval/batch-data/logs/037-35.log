@@ -1,0 +1,24 @@
+Pipeline complete. Here's the result:
+
+```json
+{
+  "status": "completed",
+  "id": "35",
+  "company": "OpenAI",
+  "role": "Researcher, Robustness & Safety Training",
+  "score": 2.2,
+  "legitimacy": "Suspicious",
+  "notion_url": "https://www.notion.so/Report-34798a5aae728123ba51c0f2e367476c",
+  "error": null
+}
+```
+
+**Score: 2.2/5 — Do not apply.**
+
+Key findings:
+- **3 hard blockers:** PhD required (you have MS), 4+ years dedicated AI safety research (you have 3 years general AI/ML), and safety specialization mismatch (your trajectory is agentic AI engineering, not safety research)
+- **Posting is 35+ months old** (May 2023) — almost certainly filled or abandoned
+- **Comp is top-of-market** ($295K-$445K base + equity = $700K-$1.5M+ TC) but irrelevant given the qualification gap
+- **Level mismatch:** Role targets PhD + 4 years safety experience (~senior researcher). Your profile fits junior ML engineer / entry-level research engineer
+
+Report saved to `/tmp/eval-batch-35-openai.md` and synced to Notion.

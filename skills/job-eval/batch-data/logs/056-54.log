@@ -1,0 +1,22 @@
+Evaluation complete. Here's the JSON output:
+
+```json
+{
+  "status": "completed",
+  "id": "54",
+  "company": "Apple",
+  "role": "AIML - Machine Learning Engineer, Answers, Knowledge & Information (AKI)",
+  "score": 3.2,
+  "legitimacy": "Suspicious",
+  "notion_url": "https://www.notion.so/Report-34798a5aae72815fa336f8fe7e8cb7c0",
+  "error": null
+}
+```
+
+**Key findings:**
+
+- **Score: 3.2/5** — Decent ML/NLP alignment but two blockers: the 5-year experience requirement (you have ~3.2 FT years) and no traditional search/IR background.
+- **Legitimacy: Suspicious** — The original posting returns 404. A cached version shows it closed April 7 (15 days ago). However, Apple's AKI team has 5+ other active postings at different levels.
+- **Recommendation:** Skip this specific URL. Instead, look at active AKI openings — particularly roles with lower experience thresholds (Applied ML Engineer, or India-based postings which may have different requirements).
+- **Comp:** Apple ICT3 ML Engineer total comp ~$277K (base $175K + $89K stock + $13K bonus) — above market.
+- **Report saved:** `/tmp/eval-batch-54-apple.md` and uploaded to Notion.
