@@ -43,6 +43,7 @@ NOTION_API = "https://api.notion.com/v1"
 
 NOTION_DB_APPLICATIONS = os.environ.get("NOTION_DB_APPLICATIONS", "")
 NOTION_DB_COMPANIES = os.environ.get("NOTION_DB_COMPANIES", "")
+NOTION_DB_CONNECTIONS = os.environ.get("NOTION_DB_CONNECTIONS", "")
 
 # ── Page IDs ────────────────────────────────────────────────────────
 
