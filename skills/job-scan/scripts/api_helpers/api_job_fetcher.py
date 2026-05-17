@@ -7,10 +7,66 @@ filtering and deduplication.
 """
 
 import json
+import re
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from api_helpers.api_parsers import PARSERS, parse_workday
+
+
+# ── US location filter ────────────────────────────────────────────────
+# Allow jobs located in the US, remote, or with no location specified.
+
+_US_STATE_ABBREVS = {
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+    "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+    "DC",
+}
+
+_US_KEYWORDS = re.compile(
+    r"\bUnited States\b|\bUSA\b|\bU\.S\.A\b|\bU\.S\.\b|\bRemote\b",
+    re.IGNORECASE,
+)
+
+_NON_US_KEYWORDS = re.compile(
+    r"\bIndia\b|\bGermany\b|\bFrance\b|\bJapan\b|\bChina\b|\bKorea\b"
+    r"|\bSingapore\b|\bTaiwan\b|\bIreland\b|\bCanada\b|\bBrazil\b"
+    r"|\bMexico\b|\bAustralia\b|\bIsrael\b|\bSpain\b|\bItaly\b"
+    r"|\bNetherlands\b|\bSweden\b|\bSwitzerland\b|\bPoland\b|\bPune\b"
+    r"|\bBangalore\b|\bHyderabad\b|\bMumbai\b|\bDelhi\b|\bGurgaon\b"
+    r"|\bNoida\b|\bChennai\b|\bTokyo\b|\bLondon\b|\bBerlin\b|\bParis\b"
+    r"|\bMunich\b|\bToronto\b|\bVancouver\b|\bMontreal\b|\bDublin\b"
+    r"|\bAmsterdam\b|\bShanghai\b|\bBeijing\b|\bSeoul\b|\bTel Aviv\b"
+    r"|\bSão Paulo\b|\bMexico City\b|\bSydney\b|\bMelbourne\b"
+    r"|\bTaoyuan\b|\bAthlone\b",
+    re.IGNORECASE,
+)
+
+
+def is_us_location(location: str) -> bool:
+    """Return True if location is US-based, remote, or unknown."""
+    if not location or not location.strip():
+        return True  # Unknown location — don't filter out
+
+    # Explicit US signals
+    if _US_KEYWORDS.search(location):
+        return True
+
+    # Check for US state abbreviations (e.g. "CA", "NY", "San Francisco, CA")
+    tokens = re.split(r"[,\s\-/|]+", location)
+    for token in tokens:
+        if token.upper() in _US_STATE_ABBREVS:
+            return True
+
+    # Explicit non-US signals
+    if _NON_US_KEYWORDS.search(location):
+        return False
+
+    # Ambiguous — let it through to avoid false negatives
+    return True
 
 FETCH_TIMEOUT_S = 10
 
@@ -119,6 +175,10 @@ def fetch_and_filter(targets, title_filter, cutoff, concurrency=10):
                 if not title_filter(job["title"]):
                     total_filtered += 1
                     continue
+                # Location filter — US only
+                if not is_us_location(job.get("location", "")):
+                    total_filtered += 1
+                    continue
                 # Intra-scan URL dedup
                 if job["url"] in seen_urls:
                     total_dupes += 1
@@ -129,6 +189,7 @@ def fetch_and_filter(targets, title_filter, cutoff, concurrency=10):
                     "company": job["company"],
                     "role": job["title"],
                     "url": job["url"],
+                    "location": job.get("location", ""),
                     "source": f"{company['_api']['type']}-api",
                 })
 

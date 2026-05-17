@@ -20,6 +20,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 from scripts.notion.db_applications import load_dedup_sets, add_scanned_jobs_batch
 from scripts.notion.page_preferences import build_title_filter
 
+# Import US location filter (add parent of job-scan scripts to path)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+from api_helpers.api_job_fetcher import is_us_location
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIVENESS_SCRIPT = os.path.join(SCRIPT_DIR, "liveness_helpers", "check-liveness.mjs")
 
@@ -39,6 +43,20 @@ def apply_title_filter(candidates):
             filtered += 1
 
     print(f"  After title filter: {len(passed)} pass, {filtered} filtered out")
+    return passed
+
+
+def apply_location_filter(candidates):
+    """Filter candidates to US-based, remote, or unknown locations only."""
+    passed = []
+    filtered = 0
+    for c in candidates:
+        location = c.get("location", "")
+        if is_us_location(location):
+            passed.append(c)
+        else:
+            filtered += 1
+    print(f"  After location filter: {len(passed)} pass, {filtered} non-US filtered out")
     return passed
 
 
@@ -71,7 +89,7 @@ def dedup(candidates):
 
         intra_urls.add(url)
         intra_company_roles.add(key)
-        new_jobs.append({"company": company, "role": role, "url": url})
+        new_jobs.append({"company": company, "role": role, "url": url, "location": c.get("location", "")})
 
     print(f"  After dedup: {len(new_jobs)} new, {dupes} duplicates")
     return new_jobs
@@ -173,6 +191,13 @@ def main():
 
     if not filtered:
         print("No candidates passed title filter.")
+        return
+
+    # Step 1.5: Location filter (US only)
+    filtered = apply_location_filter(filtered)
+
+    if not filtered:
+        print("No candidates passed location filter.")
         return
 
     # Step 2: Dedup
