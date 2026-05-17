@@ -65,10 +65,22 @@ PARENT_PAGE = os.environ.get("NOTION_PAGE_PARENT", "")
 # Short aliases for Notion page titles that differ from their normalized form.
 # Maps normalized title -> short alias used in batch-prompt.md and CLI.
 _TITLE_ALIASES = {
+    # Old titles (before Notion page renaming)
     "multimodal-roma-mroma": "mroma",
     "deep-research-agent": "deep-research",
     "text2sql": "txt2sql",
     "automated-harness-tracing": "harness",
+    # New titles with company prefixes
+    "sentient-roma-recursive-deep-search-agent": "roma",
+    "sentient-sera-semantic-embedding-reasoning-agent": "sera",
+    "sentient-multimodal-roma-mroma": "mroma",
+    "sentient-automated-harness-tracing": "harness",
+    "sentient-arena-mcp": "arena-mcp",
+    "sentient-gepa": "gepa",
+    "sentient-evodata": "evodata",
+    "sentient-evoskill-20-tracedb-cross-iteration-memory-for-the-evoskill-evolutionary-loop": "evoskill-tracedb",
+    "strategy-deep-research-agent": "deep-research",
+    "piramal-rag-based-text2sql-graph-ai-agent": "txt2sql",
 }
 
 
