@@ -170,10 +170,112 @@ For each skipped company:
 
 1. Build a WebSearch query using `site:{careers_url}` + positive keywords from Notion Preferences
 2. Run WebSearch with the query
-3. Parse each result — extract title, company, and URL
-4. Append ALL results to `skills/job-scan/candidate_store.json` (title filtering happens later in Step 3)
+3. For each result, check if the URL is a **specific job posting** or a **landing/category page**:
+   - **Specific job URL** (has UUID, numeric job ID like `/jobs/12345`, or known ATS pattern) → add directly to candidate store
+   - **Landing/category page** (URL ends in `/careers`, `/search?`, `/job-category/`, or has no job-specific identifier) → **run the Adaptive Career Page Crawl protocol below**
+4. Append all results to `skills/job-scan/candidate_store.json` (title filtering happens later in Step 3)
 
-**Use a background agent** to run all skipped company searches in parallel for speed.
+**Process skipped companies sequentially** (one browser tab at a time). Chrome DevTools MCP cannot run multiple tabs in parallel for crawling.
+
+#### Adaptive Career Page Crawl Protocol
+
+When a URL is a landing/category page, follow this protocol to extract individual job URLs using the site's own filters.
+
+**Step A — Open & Orient:**
+
+1. Call `mcp__chrome-devtools__new_page` with the landing page URL
+2. Wait 3 seconds for JS/SPA rendering
+3. Call `mcp__chrome-devtools__take_snapshot` to get the accessibility tree
+4. Classify the page into one of three types:
+   - **Type A (Filter-capable):** Page has visible search/filter controls — look for `searchbox`, `combobox`, `textbox` with labels like "search", "keyword", "location", "country", "team", "category"
+   - **Type B (Plain listing):** Page shows job listings directly with no filter UI — just links to individual jobs
+   - **Type C (Unusable):** Page requires login, shows CAPTCHA, is empty, or failed to load
+5. Branch based on type: Type A → Step B, Type B → Step C, Type C → Step E
+
+**Step B — Apply Filters (Type A only):**
+
+1. **Location filter (priority 1):**
+   - If location dropdown/combobox exists: `click` to open it, `take_snapshot` to see options, click "United States" / "US" / "USA" / "North America" (whichever available)
+   - If location text input exists: `fill` with "United States", press Enter or select from autocomplete
+   - If no location filter: skip (do not fail)
+
+2. **Keyword filter (priority 2):**
+   - If search/keyword text input exists: `fill` with the top 2-3 positive keywords from Notion Preferences joined by space (e.g., "ML Engineer Research Scientist"). Do NOT use OR syntax — type natural terms.
+   - If role/team/category dropdown exists: open it, select the option closest to positive keywords (e.g., "Machine Learning", "AI", "Research")
+   - If no keyword filter: skip (do not fail)
+
+3. **Trigger search:** Press Enter or click a "Search" / "Apply" / "Filter" button if visible. Wait 2-3 seconds for results.
+
+4. **Verify results:** Call `take_snapshot` again.
+   - If results loaded (links visible): proceed to Step C
+   - If "0 results" or page unchanged: **broaden** — remove keyword filter, keep only location, retry. If still 0: fall through to Step C with unfiltered page.
+
+**Step C — Extract Job Links (Type A filtered + Type B):**
+
+Run this JavaScript via `mcp__chrome-devtools__evaluate_script`:
+
+```javascript
+(() => {
+  const links = Array.from(document.querySelectorAll('a[href]'));
+  const seen = new Set();
+  return links.filter(a => {
+    const href = a.href;
+    const path = new URL(href, location.origin).pathname;
+    return /\/(jobs?|details|position|opening|apply|posting|role)\b/i.test(path)
+      || /\/\d{5,}/.test(path)
+      || /[0-9a-f]{8}-[0-9a-f]{4}-/.test(path);
+  }).map(a => ({
+    url: a.href,
+    title: a.textContent.trim().replace(/\\s+/g, ' ').substring(0, 200)
+  })).filter(j => j.title.length > 3 && !seen.has(j.url) && seen.add(j.url));
+})()
+```
+
+- If `evaluate_script` fails or returns empty: fall back to reading the snapshot for links with job-like patterns
+- For each extracted job: `{"company": "<company_name>", "role": "<title>", "url": "<url>", "source": "career_crawl"}`
+- **Discard the original landing page URL** — never add it to the candidate store
+
+**Step D — Handle Pagination (max 3 pages):**
+
+1. After extracting from the current page, check the snapshot for pagination controls: "Next", "Show more", page number buttons, or "Load more"
+2. If a next-page control exists AND fewer than 50 jobs extracted so far: click it, wait 2 seconds, run extraction again
+3. **Cap at 3 pages maximum** — stop after page 3 regardless
+4. If the site uses infinite scroll / "Load more": click the load-more button up to 2 times, then extract all links at once
+5. Deduplicate extracted URLs across pages before adding to candidate store
+
+**Step E — Handle Failures (Type C + errors):**
+
+- **Page won't load / timeout:** Log `crawl failed: page did not load for {company}`. Move to next company.
+- **Login / CAPTCHA required:** Log `crawl failed: login/CAPTCHA required for {company}`. Move to next company.
+- **No job links found:** Log `crawl failed: no job links detected on {url}`. Move to next company.
+- **Script errors:** Try snapshot-based fallback. If that also finds nothing, log and move on.
+- **NEVER block the pipeline** — a failed crawl must not prevent processing other companies.
+
+After processing all skipped companies, print a summary:
+```
+Career page crawl: X companies attempted, Y succeeded (Z total jobs), W failed
+```
+
+#### Worked Example
+
+```
+Company: TechCorp (skipped, careers_url: https://careers.techcorp.com/engineering)
+1. WebSearch: site:careers.techcorp.com "ML Engineer" OR "Research Scientist"
+   → Returns https://careers.techcorp.com/engineering?team=ml (landing page)
+2. Open page → take_snapshot
+   → Finds: searchbox (uid: s42), location dropdown (uid: s78), 150 job listings
+   → Classified as Type A (filter-capable)
+3. Apply filters:
+   → Click location dropdown (s78) → select "United States"
+   → Fill search box (s42) with "ML Engineer"
+   → Press Enter → wait 3s → take_snapshot
+   → Now shows 12 results (down from 150)
+4. Extract links:
+   → evaluate_script returns 12 job objects with specific URLs
+   → e.g., {url: "careers.techcorp.com/jobs/12345/senior-ml-engineer", title: "Senior ML Engineer"}
+5. No page 2 → done
+6. Append 12 candidates to candidate_store.json with source: "career_crawl"
+```
 
 **Step 2 (MANDATORY):** WebSearch discovery for broad queries:
 
