@@ -173,7 +173,7 @@ For each skipped company:
 3. For each result, check if the URL is a **specific job posting** or a **landing/category page**:
    - **Specific job URL** (has UUID, numeric job ID like `/jobs/12345`, or known ATS pattern) → add directly to candidate store
    - **Landing/category page** (URL ends in `/careers`, `/search?`, `/job-category/`, or has no job-specific identifier) → **run the Adaptive Career Page Crawl protocol below**
-4. Append all results to `skills/job-scan/candidate_store.json` (title filtering happens later in Step 3)
+4. **Return all results as JSON** — do NOT write to `candidate_store.json` directly. Background agents lack file write permissions. Instead, return the array of candidates in the agent's result, and the main orchestrator (you) will append them to `candidate_store.json` after the agent completes.
 
 **Process skipped companies sequentially** (one browser tab at a time). Chrome DevTools MCP cannot run multiple tabs in parallel for crawling.
 
@@ -292,11 +292,19 @@ For each query:
    - Title: text before " @ " or " | " or " — " in the result title
    - Company: text after " @ " or " | " or " — "
    - URL: the result link
-3. Append ALL results to `skills/job-scan/candidate_store.json` (title filtering happens later in Step 3)
+3. **Return all results as JSON** — do NOT write to `candidate_store.json` directly. Background agents lack file write permissions. Instead, return the array of candidates in the agent's result, and the main orchestrator (you) will append them to `candidate_store.json` after the agent completes.
 
 Each candidate should be: `{"company": "...", "role": "...", "url": "...", "source": "web_search"}`
 
-**Use a background agent** to run all broad discovery queries in parallel for speed.
+**Use a background agent** to run all broad discovery queries in parallel for speed. After the agent completes, parse its returned JSON and append to `candidate_store.json` yourself.
+
+**IMPORTANT — Background Agent File Write Pattern:**
+Background agents cannot write files (permissions are denied automatically). Always instruct background agents to:
+1. Collect results in memory
+2. Return the full JSON array in their completion message
+3. The main orchestrator then reads the agent's result and writes to `candidate_store.json`
+
+Never instruct a background agent to write/edit/append to `candidate_store.json` directly.
 
 **Step 2.5 (MANDATORY):** Add user-input jobs from Notion Preferences:
 
