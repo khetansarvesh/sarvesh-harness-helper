@@ -223,14 +223,14 @@ To skip the liveness check (faster, but dead links may get through):
 python3 skills/job-scan/scripts/dedup_liveness_upload.py skills/job-scan/candidate_store.json --skip-liveness
 ```
 
-### Quick scan (API only — no WebSearch or liveness):
+### Quick scan (API only — no WebSearch):
 
 ```bash
 python3 skills/job-scan/scripts/scout_specials.py
-python3 skills/job-scan/scripts/dedup_liveness_upload.py skills/job-scan/candidate_store.json --skip-liveness
+python3 skills/job-scan/scripts/dedup_liveness_upload.py skills/job-scan/candidate_store.json
 ```
 
-Two commands: scan writes to candidate store, dedup + upload to Notion. Skips WebSearch and liveness check.
+Two commands: scan writes to candidate store, dedup + liveness + upload to Notion. Skips WebSearch but still runs liveness check.
 
 ### Scan a single company:
 
