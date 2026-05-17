@@ -136,9 +136,9 @@ node skills/job-scan/scripts/liveness_helpers/check-liveness.mjs --file urls.txt
 
 ## Running the Scanner
 
-### Full scan (API + WebSearch) — recommended:
+### Default scan (API + WebSearch + liveness):
 
-This is the complete pipeline: collect from all sources → title filter → dedup → liveness check → upload.
+This is the standard pipeline that runs every time `/job-scan` is invoked. ALL steps are mandatory — do NOT skip WebSearch or liveness.
 
 **Important:** Title filtering is centralized in `dedup_liveness_upload.py`, NOT in the collection steps. All sources just dump raw candidates into `candidate_store.json`. Filtering happens once at the end.
 
@@ -148,9 +148,9 @@ This is the complete pipeline: collect from all sources → title filter → ded
 python3 skills/job-scan/scripts/scout_specials.py
 ```
 
-**Step 1.5:** WebSearch fallback for companies without ATS APIs (agent-executed):
+**Step 1.5 (MANDATORY):** WebSearch fallback for companies without ATS APIs:
 
-`scout_specials.py` prints companies it skipped (no detectable API) with their careers URLs. For each skipped company, use WebSearch to discover jobs.
+`scout_specials.py` prints companies it skipped (no detectable API) with their careers URLs. **ALWAYS run WebSearch for these skipped companies** — they often include top employers (OpenAI, Meta, Apple, etc.) that don't have public JSON APIs.
 
 **How to build the query:** Use `site:{careers_page_url}` followed by positive keywords from the Notion Preferences page (the same keywords used by the title filter). Pick the most relevant 3-5 keywords for each query.
 
@@ -173,7 +173,9 @@ For each skipped company:
 3. Parse each result — extract title, company, and URL
 4. Append ALL results to `skills/job-scan/candidate_store.json` (title filtering happens later in Step 3)
 
-**Step 2:** Run WebSearch discovery for broad queries (agent-executed):
+**Use a background agent** to run all skipped company searches in parallel for speed.
+
+**Step 2 (MANDATORY):** WebSearch discovery for broad queries:
 
 Load search queries from Notion by running:
 
@@ -192,7 +194,9 @@ For each query:
 
 Each candidate should be: `{"company": "...", "role": "...", "url": "...", "source": "web_search"}`
 
-**Step 2.5:** Add user-input jobs from Notion Preferences (agent-executed):
+**Use a background agent** to run all broad discovery queries in parallel for speed.
+
+**Step 2.5 (MANDATORY):** Add user-input jobs from Notion Preferences:
 
 Load manually added job URLs:
 ```bash
@@ -206,7 +210,7 @@ For each URL listed, append to `skills/job-scan/candidate_store.json` with:
 
 This allows you to paste job URLs directly into the Notion Preferences page under "User Input Jobs" and have them flow through the same pipeline.
 
-**Step 3:** Title filter, dedup, liveness check, and upload:
+**Step 3 (MANDATORY):** Title filter, dedup, liveness check, and upload:
 
 ```bash
 python3 skills/job-scan/scripts/dedup_liveness_upload.py skills/job-scan/candidate_store.json
@@ -218,19 +222,7 @@ This script runs four steps in sequence:
 3. **Liveness check** — runs Playwright on each deduped URL to verify it's still active. Expired links are filtered out before upload.
 4. **Upload** — writes surviving jobs to Notion with status "Scanned"
 
-To skip the liveness check (faster, but dead links may get through):
-```bash
-python3 skills/job-scan/scripts/dedup_liveness_upload.py skills/job-scan/candidate_store.json --skip-liveness
-```
-
-### Quick scan (API only — no WebSearch):
-
-```bash
-python3 skills/job-scan/scripts/scout_specials.py
-python3 skills/job-scan/scripts/dedup_liveness_upload.py skills/job-scan/candidate_store.json
-```
-
-Two commands: scan writes to candidate store, dedup + liveness + upload to Notion. Skips WebSearch but still runs liveness check.
+**NEVER use `--skip-liveness`** — dead URLs will get uploaded to Notion.
 
 ### Scan a single company:
 
