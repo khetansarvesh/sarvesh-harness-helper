@@ -46,6 +46,88 @@ def apply_title_filter(candidates):
     return passed
 
 
+def is_specific_job_url(url: str) -> bool:
+    """Return True if URL points to a specific job posting, not a category/landing page."""
+    if not url:
+        return False
+
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    path = parsed.path.rstrip("/")
+    query = parsed.query
+    segments = [s for s in path.split("/") if s]
+
+    # Known ATS patterns — ALWAYS specific job URLs
+    if "ashbyhq.com" in parsed.netloc and len(segments) >= 2:
+        return True
+    if "greenhouse.io" in parsed.netloc and "/jobs/" in path:
+        return True
+    if "lever.co" in parsed.netloc and len(segments) >= 2:
+        return True
+    if "workable.com" in parsed.netloc and "/j/" in path:
+        return True
+    if "myworkdayjobs.com" in parsed.netloc and "/job/" in path:
+        return True
+
+    # REJECT patterns — landing/category pages
+    reject_patterns = [
+        r"/careers/?$",
+        r"/careers[#?]",
+        r"/careers-at-",
+        r"/job-category/",
+        r"/job-categories/",
+        r"/search\b",
+        r"[?&]team=",
+        r"[?&]filter=",
+        r"/explore-careers",
+        r"/content/en/",
+        r"/opportunities/?$",
+    ]
+    full_url_str = path + ("?" + query if query else "")
+    for pattern in reject_patterns:
+        if re.search(pattern, full_url_str, re.IGNORECASE):
+            return False
+
+    # Category page: /en/jobs/{category-slug} with NO numeric ID
+    if re.search(r"/jobs?/[a-z][a-z0-9-]+$", path) and not re.search(r"/\d{5,}", path):
+        return False
+
+    # Generic /ai-ml-engineering style endpoints
+    if re.search(r"/[a-z]+-[a-z]+-[a-z]+/?$", path) and not re.search(r"\d{5,}", path):
+        if len(segments) <= 4 and not re.search(r"[a-f0-9]{8}-", url):
+            return False
+
+    # Check for job-specific identifiers
+    if re.search(r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}", url):
+        return True
+    if re.search(r"/\d{5,}", path):
+        return True
+    if re.search(r"/[jJ][rR]\d{4,}", path) or re.search(r"/[R]\d{5,}", path):
+        return True
+    if re.search(r"--\d{5,}", path):
+        return True
+
+    # Short path with no identifiers = probably landing page
+    if len(segments) <= 2:
+        return False
+
+    return True
+
+
+def apply_url_filter(candidates):
+    """Filter out URLs that point to landing/category pages instead of specific job postings."""
+    passed = []
+    filtered = 0
+    for c in candidates:
+        url = c.get("url", "")
+        if is_specific_job_url(url):
+            passed.append(c)
+        else:
+            filtered += 1
+    print(f"  After URL filter: {len(passed)} pass, {filtered} landing/category pages filtered out")
+    return passed
+
+
 def apply_location_filter(candidates):
     """Filter candidates to US-based, remote, or unknown locations only."""
     passed = []
@@ -198,6 +280,13 @@ def main():
 
     if not filtered:
         print("No candidates passed location filter.")
+        return
+
+    # Step 1.6: URL specificity filter (block landing/category pages)
+    filtered = apply_url_filter(filtered)
+
+    if not filtered:
+        print("No candidates passed URL filter.")
         return
 
     # Step 2: Dedup
