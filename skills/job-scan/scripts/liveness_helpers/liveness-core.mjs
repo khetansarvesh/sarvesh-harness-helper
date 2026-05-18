@@ -43,9 +43,32 @@ function hasApplyControl(controls = []) {
   return controls.some((control) => APPLY_PATTERNS.some((pattern) => pattern.test(control)));
 }
 
-export function classifyLiveness({ status = 0, finalUrl = '', bodyText = '', applyControls = [] } = {}) {
+/**
+ * Check if a redirect lost the job-specific identifier from the URL.
+ * e.g., greenhouse.io/figma/jobs/4756707004 → figma.com/careers/ = expired
+ */
+function redirectLostJobId(originalUrl = '', finalUrl = '') {
+  if (!originalUrl || !finalUrl || originalUrl === finalUrl) return false;
+  const JOB_ID_PATTERNS = [
+    /\/jobs?\/\d{4,}/,                                    // /jobs/12345
+    /\/details\/\d{4,}/,                                  // /details/200123
+    /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/, // UUID
+    /\/j\/[A-Z0-9]{6,}/,                                  // Workable /j/ABC123
+    /\/job\/[^/]+_[A-Z0-9]+/,                              // Workday /job/..._R12345
+  ];
+  const originalHasId = JOB_ID_PATTERNS.some(p => p.test(originalUrl));
+  const finalHasId = JOB_ID_PATTERNS.some(p => p.test(finalUrl));
+  return originalHasId && !finalHasId;
+}
+
+export function classifyLiveness({ status = 0, originalUrl = '', finalUrl = '', bodyText = '', applyControls = [] } = {}) {
   if (status === 404 || status === 410) {
     return { result: 'expired', reason: `HTTP ${status}` };
+  }
+
+  // Redirect lost the job ID — expired job redirected to general careers page
+  if (redirectLostJobId(originalUrl, finalUrl)) {
+    return { result: 'expired', reason: `redirect lost job ID: ${originalUrl} → ${finalUrl}` };
   }
 
   const expiredUrl = firstMatch(EXPIRED_URL_PATTERNS, finalUrl);

@@ -62,7 +62,7 @@ async function checkUrl(page, url) {
         .filter(Boolean);
     });
 
-    return classifyLiveness({ status, finalUrl, bodyText, applyControls });
+    return classifyLiveness({ status, originalUrl: url, finalUrl, bodyText, applyControls });
 
   } catch (err) {
     return { result: 'expired', reason: `navigation error: ${err.message.split('\n')[0]}` };
