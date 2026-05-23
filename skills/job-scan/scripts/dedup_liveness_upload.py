@@ -28,6 +28,20 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIVENESS_SCRIPT = os.path.join(SCRIPT_DIR, "liveness_helpers", "check-liveness.mjs")
 
 
+def normalize_source(raw: str) -> str | None:
+    """Map raw source strings to Notion select values: API, Web Search, User."""
+    if not raw:
+        return None
+    raw = raw.strip().lower()
+    if raw.endswith("-api"):
+        return "API"
+    if raw in ("web_search", "career_crawl"):
+        return "Web Search"
+    if raw == "user_input":
+        return "User"
+    return None
+
+
 def apply_title_filter(candidates):
     """Filter candidates by title using positive/negative keywords from Notion Preferences."""
     title_filter = build_title_filter()
@@ -171,7 +185,7 @@ def dedup(candidates):
 
         intra_urls.add(url)
         intra_company_roles.add(key)
-        new_jobs.append({"company": company, "role": role, "url": url, "location": c.get("location", "")})
+        new_jobs.append({"company": company, "role": role, "url": url, "location": c.get("location", ""), "source": c.get("source", "")})
 
     print(f"  After dedup: {len(new_jobs)} new, {dupes} duplicates")
     return new_jobs
@@ -196,16 +210,29 @@ def liveness_check(jobs):
             capture_output=True, text=True, timeout=600,
         )
         output = result.stdout
+        stderr = result.stderr
     except subprocess.TimeoutExpired:
-        print("  Warning: Liveness check timed out — skipping, all jobs pass through")
-        return jobs
-    except FileNotFoundError:
-        print("  Warning: Node.js or check-liveness.mjs not found — skipping liveness check")
-        return jobs
-    finally:
         os.unlink(tmp_path)
+        print("  ERROR: Liveness check timed out. Aborting — no jobs will be uploaded.", file=sys.stderr)
+        sys.exit(1)
+    except FileNotFoundError:
+        os.unlink(tmp_path)
+        print("  ERROR: Node.js or check-liveness.mjs not found. Aborting — no jobs will be uploaded.", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+
+    # CRITICAL: If the liveness script crashed, abort rather than passing all jobs through
+    if result.returncode != 0 and result.returncode != 1:
+        print(f"  ERROR: Liveness script crashed (exit code {result.returncode}).", file=sys.stderr)
+        if stderr:
+            print(f"  stderr: {stderr[:500]}", file=sys.stderr)
+        print("  Aborting — no jobs will be uploaded.", file=sys.stderr)
+        sys.exit(1)
 
     # Parse output: each line is "✅ active     URL" or "❌ expired    URL" or "⚠️ uncertain  URL"
+    classified_count = 0
     expired_urls = set()
     for line in output.split("\n"):
         line = line.strip()
@@ -213,18 +240,23 @@ def liveness_check(jobs):
             continue
         match = re.match(r"[✅❌⚠️]+\s+(active|expired|uncertain)\s+(https?://\S+)", line)
         if match:
+            classified_count += 1
             status = match.group(1)
             url = match.group(2)
             if status == "expired":
                 expired_urls.add(url)
 
-    if expired_urls:
-        surviving = [j for j in jobs if j["url"] not in expired_urls]
-        print(f"  Liveness: {len(expired_urls)} expired, {len(surviving)} active/uncertain pass through")
-        return surviving
-    else:
-        print(f"  Liveness: all {len(jobs)} URLs active")
-        return jobs
+    # If liveness checked zero URLs but we expected results, something went wrong
+    if classified_count == 0:
+        print(f"  ERROR: Liveness script produced no results for {len(urls)} URLs.", file=sys.stderr)
+        if stderr:
+            print(f"  stderr: {stderr[:500]}", file=sys.stderr)
+        print("  Aborting — no jobs will be uploaded.", file=sys.stderr)
+        sys.exit(1)
+
+    surviving = [j for j in jobs if j["url"] not in expired_urls]
+    print(f"  Liveness: {len(expired_urls)} expired, {len(surviving)} active/uncertain pass through")
+    return surviving
 
 
 def upload(jobs, candidate_file):
@@ -302,6 +334,10 @@ def main():
         surviving = new_jobs
     else:
         surviving = liveness_check(new_jobs)
+
+    # Step 3.5: Normalize source field
+    for job in surviving:
+        job["source"] = normalize_source(job.get("source", ""))
 
     # Step 4: Upload
     upload(surviving, candidate_file)

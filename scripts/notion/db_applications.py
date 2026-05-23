@@ -38,7 +38,7 @@ VALID_STATUSES = [
 
 # ── Add scanned jobs ────────────────────────────────────────────────
 
-def add_scanned_job(company, role, url):
+def add_scanned_job(company, role, url, source=None):
     """Add a single scanned job row to Notion."""
     properties = {
         "Report": {"title": [{"text": {"content": "Report"}}]},
@@ -49,6 +49,8 @@ def add_scanned_job(company, role, url):
     }
     if url:
         properties["URL"] = {"url": url}
+    if source:
+        properties["Source"] = {"select": {"name": source}}
 
     result = notion_request("pages", method="POST", data={
         "parent": {"database_id": NOTION_DB_APPLICATIONS},
@@ -79,7 +81,7 @@ def add_scanned_jobs_batch(jobs):
     """
     results = []
     for job in jobs:
-        result = add_scanned_job(job["company"], job["role"], job.get("url"))
+        result = add_scanned_job(job["company"], job["role"], job.get("url"), source=job.get("source"))
         results.append(result)
     return {"success": True, "count": len(results), "results": results}
 
@@ -391,6 +393,7 @@ def main():
     p_add.add_argument("--company", required=True)
     p_add.add_argument("--role", required=True)
     p_add.add_argument("--url", default=None)
+    p_add.add_argument("--source", default=None, choices=["API", "Web Search", "User"])
 
     # add-batch
     sub.add_parser("add-batch", help="Add scanned jobs from JSON stdin")
@@ -419,7 +422,7 @@ def main():
         sys.exit(1)
 
     if args.command == "add":
-        result = add_scanned_job(args.company, args.role, args.url)
+        result = add_scanned_job(args.company, args.role, args.url, source=args.source)
         print(json.dumps(result, indent=2))
 
     elif args.command == "add-batch":
