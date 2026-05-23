@@ -1,9 +1,0 @@
-**Evaluation complete.** Score: **3.4/5** | Legitimacy: **Proceed with Caution**
-
-Key findings:
-- **Main blocker:** PhD strongly preferred at MSR; your MS + research output is strong but may not clear the credential filter
-- **Strengths:** RAG/GenAI pipeline experience (2+ years), PyTorch + distributed training, SOTA research results (ROMA), experiment-driven methodology (SERA), patent (Text2SQL)
-- **Concerns:** Microsoft hiring freeze (March 2026) — AI teams spared but MSR status unclear. The careers URL kept returning 301 redirects, suggesting the posting may have been taken down or migrated
-- **Recommendation:** If pursuing Microsoft, consider targeting "Applied Scientist" (non-Research) roles which have lower PhD requirements and still pay well ($161K-$261K TC at L62-63)
-
-Report saved to `/tmp/eval-batch-62-microsoft-research.md` and synced to [Notion](https://www.notion.so/Report-34798a5aae72819482a1f311732774c1).
