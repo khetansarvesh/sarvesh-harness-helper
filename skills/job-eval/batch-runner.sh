@@ -402,8 +402,14 @@ process_offer() {
       score="$score_match"
     fi
 
-    # Check min-score gate
-    if [[ "$score" != "-" && -n "$score" ]] && (( $(echo "$MIN_SCORE > 0" | bc -l) )); then
+    # Detect disqualification flag from worker output
+    local disqualified=false
+    if grep -q '"disqualified"[[:space:]]*:[[:space:]]*true' "$log_file" 2>/dev/null; then
+      disqualified=true
+    fi
+
+    # Check min-score gate (skip for disqualified jobs — already handled by worker)
+    if [[ "$disqualified" == "false" && "$score" != "-" && -n "$score" ]] && (( $(echo "$MIN_SCORE > 0" | bc -l) )); then
       if (( $(echo "$score < $MIN_SCORE" | bc -l) )); then
         update_state "$id" "$url" "skipped" "$started_at" "$completed_at" "$report_num" "$score" "below-min-score" "$retries"
         echo "    ⏭️  Skipped (score: $score < min-score: $MIN_SCORE)"
@@ -439,7 +445,7 @@ print_summary() {
     return
   fi
 
-  local total=0 completed=0 failed=0 pending=0
+  local total=0 completed=0 failed=0 pending=0 disqualified=0
   local score_sum=0 score_count=0
 
   while IFS=$'\t' read -r sid _ sstatus _ _ _ sscore _ _; do
@@ -448,8 +454,13 @@ print_summary() {
     case "$sstatus" in
       completed) completed=$((completed + 1))
         if [[ "$sscore" != "-" && -n "$sscore" ]]; then
-          score_sum=$(echo "$score_sum + $sscore" | bc 2>/dev/null || echo "$score_sum")
-          score_count=$((score_count + 1))
+          # Count disqualified jobs (score 0 in completed state)
+          if (( $(echo "$sscore == 0" | bc -l 2>/dev/null || echo "0") )); then
+            disqualified=$((disqualified + 1))
+          else
+            score_sum=$(echo "$score_sum + $sscore" | bc 2>/dev/null || echo "$score_sum")
+            score_count=$((score_count + 1))
+          fi
         fi
         ;;
       failed) failed=$((failed + 1)) ;;
@@ -457,7 +468,7 @@ print_summary() {
     esac
   done < "$STATE_FILE"
 
-  echo "Total: $total | Completed: $completed | Failed: $failed | Pending: $pending"
+  echo "Total: $total | Completed: $completed | Failed: $failed | Pending: $pending | Disqualified: $disqualified"
 
   if (( score_count > 0 )); then
     local avg
@@ -583,38 +594,38 @@ main() {
       process_offer "${pending_ids[$i]}" "${pending_urls[$i]}" "${pending_sources[$i]}" "${pending_notes[$i]}" "${pending_page_ids[$i]}"
     done
   else
-    # Parallel processing with job control
+    # Parallel processing with job control (bash 3.2 compatible)
     local running=0
-    local -a pids=()
-    local -a pid_ids=()
+    local pids_str=""  # space-separated list of active PIDs
 
     for i in "${!pending_ids[@]}"; do
       # Wait if we're at parallel limit
       while (( running >= PARALLEL )); do
-        # Wait for any child to finish
-        for j in "${!pids[@]}"; do
-          if ! kill -0 "${pids[$j]}" 2>/dev/null; then
-            wait "${pids[$j]}" 2>/dev/null || true
-            unset 'pids[j]'
-            unset 'pid_ids[j]'
-            running=$((running - 1))
+        local new_pids=""
+        local new_running=0
+        for pid in $pids_str; do
+          if kill -0 "$pid" 2>/dev/null; then
+            new_pids="$new_pids $pid"
+            new_running=$((new_running + 1))
+          else
+            wait "$pid" 2>/dev/null || true
           fi
         done
-        # Compact arrays
-        pids=("${pids[@]}")
-        pid_ids=("${pid_ids[@]}")
-        sleep 1
+        pids_str="$new_pids"
+        running=$new_running
+        if (( running >= PARALLEL )); then
+          sleep 1
+        fi
       done
 
       # Launch worker in background
       process_offer "${pending_ids[$i]}" "${pending_urls[$i]}" "${pending_sources[$i]}" "${pending_notes[$i]}" "${pending_page_ids[$i]}" &
-      pids+=($!)
-      pid_ids+=("${pending_ids[$i]}")
+      pids_str="$pids_str $!"
       running=$((running + 1))
     done
 
     # Wait for remaining workers
-    for pid in "${pids[@]}"; do
+    for pid in $pids_str; do
       wait "$pid" 2>/dev/null || true
     done
   fi

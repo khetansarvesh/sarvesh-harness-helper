@@ -393,7 +393,7 @@ def main():
     p_add.add_argument("--company", required=True)
     p_add.add_argument("--role", required=True)
     p_add.add_argument("--url", default=None)
-    p_add.add_argument("--source", default=None, choices=["API", "Web Search", "User"])
+    p_add.add_argument("--source", default=None, choices=["API", "Web Search", "User", "Jobright"])
 
     # add-batch
     sub.add_parser("add-batch", help="Add scanned jobs from JSON stdin")

@@ -18,7 +18,8 @@ Discover new job postings by scanning ATS platforms (Greenhouse, Ashby, Lever) d
 
 - **Python 3.10+** installed
 - **NOTION_TOKEN** environment variable set (or in `.env` at repo root)
-- (Optional) **Playwright** for Level 1 (direct navigation) and Level 3 (liveness verification)
+- **Playwright** installed (`npx playwright install chromium`) — required for liveness verification
+- **Jobright.ai tab** open in Chrome with filters applied and user logged in — required for Jobright scan
 
 ## Non-Negotiables
 
@@ -142,7 +143,7 @@ This is the standard pipeline that runs every time `/job-scan` is invoked. ALL s
 
 **Important:** Title filtering is centralized in `dedup_liveness_upload.py`, NOT in the collection steps. All sources just dump raw candidates into `candidate_store.json`. Filtering happens once at the end.
 
-**Step 1:** Run API scan, writing to candidate store (defaults to last 24 hours, use `--hours 0` for all):
+**Step 1:** Run API scan, writing to candidate store. **NEVER use `--hours 0`** — it disables the time filter entirely and floods the pipeline with stale jobs (some months old). The default 24h filter is correct for daily scans. For weekly scans, use `--hours 168`. For broader catch-up scans, use `--hours 720` (30 days) at most:
 
 ```bash
 python3 skills/job-scan/scripts/scout_specials.py
@@ -277,6 +278,35 @@ Company: TechCorp (skipped, careers_url: https://careers.techcorp.com/engineerin
 6. Append 12 candidates to candidate_store.json with source: "career_crawl"
 ```
 
+**Step 1.75 (MANDATORY):** Jobright.ai scrape
+
+Jobright.ai is a job aggregator with AI-powered matching. If the user has a Jobright tab open with filters applied, scrape it for additional job discoveries.
+
+1. Call `mcp__chrome-devtools__list_pages` and look for a page URL containing `jobright.ai`
+   - If **not found** → print `"Jobright: No tab found, skipping"` and move to Step 2
+   - If **found** → call `mcp__chrome-devtools__select_page` to switch to it
+
+2. **Auto-refresh** the page to get the latest listings. Call `mcp__chrome-devtools__navigate_page` with the current Jobright URL (e.g., `https://jobright.ai/jobs/recommend`). Then call `mcp__chrome-devtools__wait_for` with text `["Recommended", "APPLY"]` and timeout 10000ms to ensure the page has fully loaded.
+
+   All extraction functions are in `skills/job-scan/scripts/jobright_helpers/extract-jobright.mjs`. Read the file and inject functions via `evaluate_script`.
+
+3. **Scroll to load all jobs.** Call `evaluate_script` with the `scrollAndCount()` function from `extract-jobright.mjs`. Returns the total number of job cards loaded.
+
+4. **Extract all job cards.** Call `evaluate_script` with the `extractJobs()` function. Returns array of `{title, company, jobrightUrl, location}`.
+
+5. **Resolve real ATS URLs.** Call `evaluate_script` with `resolveUrls(jobrightUrls)` passing the array of Jobright URLs. This fetches each info page in-browser (where auth cookies exist) and regex-matches real ATS URLs (Greenhouse, Ashby, Lever, Workday, Personio, etc.).
+
+   For any `greenhouse-embed:{token}` results, call `resolveGhEmbed(slug, token)` to resolve via the Greenhouse boards API. Derive slug from company name: lowercase, remove spaces/special chars (e.g., "Anduril Industries" → "andurilindustries").
+
+6. **Merge and save.** Combine extracted jobs with resolved URLs. Each job should have: `title`, `company`, `url` (real ATS URL or Jobright fallback), `location`. Save as `skills/job-scan/jobright_raw.json`.
+
+7. **Run the processing script** to normalize and append to candidate store:
+   ```bash
+   python3 skills/job-scan/scripts/resolve_jobright.py
+   ```
+
+8. Print the summary from the script output.
+
 **Step 2 (MANDATORY):** WebSearch discovery for broad queries:
 
 Load search queries from Notion by running:
@@ -373,6 +403,8 @@ Filtered:              2089 removed          ← hours filter only (default: 24h
 Intra-scan dupes:      0 skipped
 New offers added:      14
 
+Jobright: 8 jobs processed, 7 resolved to ATS URLs, 1 fallback  ← resolve_jobright.py output
+
 Loaded 122 candidates from candidate_store.json   ← dedup_liveness_upload.py output
   Title filter: 27 positive, 31 negative keywords
   After title filter: 107 pass, 15 filtered out
@@ -389,9 +421,13 @@ Loaded 122 candidates from candidate_store.json   ← dedup_liveness_upload.py o
 skills/job-scan/
 ├── SKILL.md                        # This file
 ├── candidate_store.json            # Staging file for collect → filter → dedup → liveness → upload
+├── jobright_raw.json               # Temporary: raw Jobright extraction (deleted after resolve)
 └── scripts/
     ├── scout_specials.py           # Portal scanner orchestrator
+    ├── resolve_jobright.py         # Jobright data normalizer + candidate store writer
     ├── dedup_liveness_upload.py         # Title filter → dedup → liveness → upload to Notion
+    ├── jobright_helpers/
+    │   └── extract-jobright.mjs    # Browser-side JS functions for Jobright extraction
     ├── api_helpers/
     │   ├── api_job_fetcher.py      # Parallel fetch from ATS APIs
     │   ├── api_parsers.py          # Board-specific parsers (Greenhouse/Ashby/Lever/Workday)

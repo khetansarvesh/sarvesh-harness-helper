@@ -44,6 +44,76 @@ You are a batch evaluation worker. You receive a job offer (URL + JD text) and p
 
 ---
 
+## Step 1.5 — Disqualification Filters
+
+**Before running the full A-G evaluation**, scan the JD for these two automatic disqualifiers. If either triggers, short-circuit with score 0 — do NOT proceed to Step 2.
+
+### Filter 1: Non-US Location
+
+| Result | Signals |
+|--------|---------|
+| **PASS** | US cities/states (e.g., "San Francisco, CA", "New York, NY"), "Remote", "Remote (US)", "Hybrid" with a US city, "United States", "USA", ambiguous or missing location, multi-location listing that includes at least one US location |
+| **DISQUALIFY (score 0)** | Explicitly non-US locations (London UK, Berlin Germany, Bangalore India, Toronto Canada, etc.), "Remote (EU only)", "Remote (EMEA)", "Remote (APAC)" |
+
+### Filter 2: Security Clearance / US Citizenship Required
+
+| Result | Signals |
+|--------|---------|
+| **DISQUALIFY (score 0)** | Active security clearance required (TS, TS/SCI, Secret, Top Secret, DoD clearance), ability to obtain clearance, "US citizenship required", "Must be a US citizen", "US Person" as defined by ITAR/EAR |
+| **PASS** | "Must be authorized to work in the US" (F-1 OPT satisfies this), "Sponsorship available", "US Person preferred" (soft preference, not hard requirement), work permit/EAD questions |
+
+### If Disqualified
+
+1. Write a SHORT mini-report (not the full A-G) to `/tmp/eval-batch-{{ID}}-{company-slug}.md`:
+
+```markdown
+# Evaluation: {Company} — {Role}
+
+**Date:** {{DATE}}
+**Score:** 0
+**Status:** Discarded
+**Disqualification Reason:** {Non-US location: {location} | Security clearance/US citizenship required}
+**URL:** {{URL}}
+**Batch ID:** {{ID}}
+
+---
+
+Role disqualified during pre-evaluation filtering. No full A-G evaluation performed.
+```
+
+2. Register in Notion with score 0 and status "Discarded":
+
+```bash
+python3 scripts/notion/db_applications.py update-eval \
+  --page-id "{{PAGE_ID}}" \
+  --score 0 \
+  --status "Discarded" \
+  --report-file /tmp/eval-batch-{{ID}}-{company-slug}.md
+```
+
+3. Output JSON with disqualification flag and **STOP** — do not proceed to Step 2:
+
+```json
+{
+  "status": "completed",
+  "id": "{{ID}}",
+  "company": "{company}",
+  "role": "{role}",
+  "score": 0,
+  "legitimacy": null,
+  "notion_url": "{url from db_applications.py output}",
+  "error": null,
+  "disqualified": true,
+  "disqualification_reason": "{reason}"
+}
+```
+
+### If NOT Disqualified
+
+Proceed to Step 2 normally.
+
+---
+
 ## Step 2 — Evaluation A-G
 
 ### Step 2.0 — Detect Archetype
@@ -250,13 +320,15 @@ Write to: `/tmp/eval-batch-{{ID}}-{company-slug}.md`
 
 ## Step 4 — Register in Notion
 
-Run this script via Bash to update the existing Notion row with evaluation results:
+Run this script via Bash to update the existing Notion row with evaluation results.
+
+**Status logic:** If the final score is **< 2**, set status to `"Discarded"` (not worth applying). Otherwise set status to `"Evaluated"`.
 
 ```bash
 python3 scripts/notion/db_applications.py update-eval \
   --page-id "{{PAGE_ID}}" \
   --score {score} \
-  --status "Evaluated" \
+  --status "{Discarded if score < 2, else Evaluated}" \
   --report-file /tmp/eval-batch-{{ID}}-{company-slug}.md
 ```
 

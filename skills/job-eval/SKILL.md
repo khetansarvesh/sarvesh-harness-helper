@@ -30,6 +30,26 @@ Each worker produces a report + tracker entry. The orchestrator manages the coor
 3. **State is always persisted** — interrupted runs resume from where they left off
 4. **Workers write to Notion directly** — no local merge needed
 5. **Workers don't generate PDFs** — only reports + tracker entries. Run job-cv-tailor separately for high-scoring roles.
+6. **Disqualification filters run before A-G evaluation** — non-US jobs and clearance-required jobs are rejected early with score 0
+
+## Disqualification Filters
+
+Workers apply two automatic disqualification filters **before** the expensive A-G evaluation. If either triggers, the job is immediately scored 0, marked "Discarded" in Notion, and the worker stops early.
+
+### What triggers automatic disqualification
+
+| Filter | Disqualify (score 0) | Pass |
+|--------|---------------------|------|
+| **Non-US Location** | Explicitly non-US locations (London UK, Berlin Germany, Toronto Canada, etc.), "Remote (EU only)", "Remote (EMEA)", "Remote (APAC)" | US cities/states, "Remote", "Remote (US)", "Hybrid" with US city, ambiguous/missing location |
+| **Security Clearance / US Citizenship** | Active clearance required (TS, TS/SCI, Secret, Top Secret, DoD), ability to obtain clearance, "US citizenship required", "Must be a US citizen", "US Person" per ITAR/EAR | "Authorized to work in US" (F-1 OPT satisfies), "Sponsorship available", "US Person preferred" (soft) |
+
+### How disqualification appears
+
+- **State file:** status = `completed`, score = `0`
+- **Notion:** status = `Discarded`, score = `0`
+- **Worker JSON output:** includes `"disqualified": true` and `"disqualification_reason": "{reason}"`
+- **Batch summary:** counted separately in the "Disqualified" counter
+- **Report:** short mini-report (no A-G sections) explaining the disqualification reason
 
 ## Running the Batch
 
@@ -163,7 +183,8 @@ id	url	status	started_at	completed_at	report_num	score	error	retries
 ### State Transitions
 
 ```
-pending → processing → completed
+pending → processing → completed (score > 0, full A-G evaluation)
+                    → completed (score 0, disqualified — skipped A-G evaluation)
                     → failed (retry with --retry-failed)
                     → skipped (score below --min-score)
 ```
