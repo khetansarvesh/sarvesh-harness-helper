@@ -256,6 +256,26 @@ Assess whether this is a real, active opening. This is SEPARATE from the 1-5 sco
 - Startup/pre-revenue: Vague JDs are normal
 - No date available: Default to "Proceed with Caution" — **never "Suspicious" without evidence**
 
+### Block H — Referrals
+
+After completing the A-G evaluation, look up referrals for this company:
+
+```bash
+python3 skills/job-eval/get_referrals.py --company "{company_name}" --json
+```
+
+Parse the JSON output. If `count > 0`, list the top 3 referrals in this format:
+
+| # | Name | Relation | Phone | Email | LinkedIn | Priority |
+|---|------|----------|-------|-------|----------|----------|
+| 1 | {name} | {relation} | {phone or —} | {email or —} | {link or —} | {priority_tags} |
+
+If a `referral_link` URL is returned, include it: `**Referral Link:** {url}`
+
+If `count == 0`, write: `No referrals found for {company}.`
+
+**NOTE:** This section is informational only — it does NOT affect the Global Score.
+
 ### Global Score
 
 | Dimension | Weight | Score (1-5) |
@@ -307,7 +327,10 @@ Write to: `/tmp/eval-batch-{{ID}}-{company-slug}.md`
 ## G) Posting Legitimacy
 {content}
 
-## H) Draft Application Answers
+## H) Referrals
+{content — output from get_referrals.py, or "No referrals found." if empty}
+
+## I) Draft Application Answers
 {only if score >= 4.5}
 
 ---
@@ -322,13 +345,20 @@ Write to: `/tmp/eval-batch-{{ID}}-{company-slug}.md`
 
 Run this script via Bash to update the existing Notion row with evaluation results.
 
-**Status logic:** If the final score is **< 2**, set status to `"Discarded"` (not worth applying). Otherwise set status to `"Evaluated"`.
+**Status logic:** Do NOT hardcode the status. Resolve it deterministically by running:
 
 ```bash
+python3 skills/job-eval/get_referrals.py resolve-status --score {score} --company "{company_name}"
+```
+
+This prints one of: `Discarded`, `Referral`, or `Evaluated`. Capture the output and use it as the `--status` value below.
+
+```bash
+STATUS=$(python3 skills/job-eval/get_referrals.py resolve-status --score {score} --company "{company_name}")
 python3 scripts/notion/db_applications.py update-eval \
   --page-id "{{PAGE_ID}}" \
   --score {score} \
-  --status "{Discarded if score < 2, else Evaluated}" \
+  --status "$STATUS" \
   --report-file /tmp/eval-batch-{{ID}}-{company-slug}.md
 ```
 
@@ -382,7 +412,7 @@ If the application form allows free text, include a cover letter draft in the re
 
 ## Draft Application Answers (score >= 4.5 only)
 
-If the role scores 4.5+, generate draft answers for common form questions. Added to report as Section H.
+If the role scores 4.5+, generate draft answers for common form questions. Added to report as Section I.
 
 | Question Type | Template |
 |--------------|----------|
