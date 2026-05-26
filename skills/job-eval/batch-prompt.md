@@ -331,7 +331,7 @@ Write to: `/tmp/eval-batch-{{ID}}-{company-slug}.md`
 {content — output from get_referrals.py, or "No referrals found." if empty}
 
 ## I) Draft Application Answers
-{only if score >= 4.5}
+{only if score >= 3}
 
 ---
 
@@ -410,9 +410,9 @@ If the application form allows free text, include a cover letter draft in the re
 
 **Tone:** "I'm choosing you" — confident, proof-first, not desperate or generic.
 
-## Draft Application Answers (score >= 4.5 only)
+## Draft Application Answers (score >= 3 only)
 
-If the role scores 4.5+, generate draft answers for common form questions. Added to report as Section I.
+If the role scores 3+, generate draft answers for common form questions. Added to report as Section I.
 
 | Question Type | Template |
 |--------------|----------|
