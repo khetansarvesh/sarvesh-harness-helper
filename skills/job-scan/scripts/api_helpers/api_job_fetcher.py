@@ -1,15 +1,25 @@
 """
 HTTP job fetcher for ATS APIs.
 
-Fetches job listings from Greenhouse, Ashby, Lever, Workday, and
-SmartRecruiters APIs. Handles paginated providers inline and provides
-parallel fetch with filtering and deduplication.
+Fetches job listings from 
+- Greenhouse
+- Ashby 
+- Lever
+- Workday
+- SmartRecruiters
+- Workable
+- Gem
+- Eightfold 
+- Rippling
+Handles paginated providers inline and provides parallel fetch with
+filtering and deduplication.
 """
 
 import json
 import re
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urlencode
 
 from api_helpers.api_parsers import PARSERS, parse_workday
 
@@ -71,16 +81,39 @@ def is_us_location(location: str) -> bool:
 FETCH_TIMEOUT_S = 10
 
 
-def fetch_json(url, method="GET", body=None):
-    """Fetch JSON from a URL with timeout and browser User-Agent."""
+def build_headers(extra_headers=None):
+    """Build common request headers for ATS calls."""
     headers = {
         "Content-Type": "application/json",
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "application/json",
     }
-    data = json.dumps(body).encode() if body else None
+    if extra_headers:
+        headers.update(extra_headers)
+    return headers
 
-    req = urllib.request.Request(url, method=method, headers=headers, data=data)
+
+def fetch_text(url, method="GET", body=None, headers=None):
+    """Fetch raw text from a URL with timeout and browser User-Agent."""
+    req_headers = build_headers(headers)
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(url, method=method, headers=req_headers, data=data)
+
+    try:
+        with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S) as resp:
+            return resp.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"HTTP {e.code}") from e
+    except Exception as e:
+        raise RuntimeError(str(e)) from e
+
+
+def fetch_json(url, method="GET", body=None, headers=None):
+    """Fetch JSON from a URL with timeout and browser User-Agent."""
+    req_headers = build_headers(headers)
+    data = json.dumps(body).encode() if body is not None else None
+
+    req = urllib.request.Request(url, method=method, headers=req_headers, data=data)
 
     try:
         with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S) as resp:
@@ -89,6 +122,22 @@ def fetch_json(url, method="GET", body=None):
         raise RuntimeError(f"HTTP {e.code}") from e
     except Exception as e:
         raise RuntimeError(str(e)) from e
+
+
+def infer_eightfold_domain(careers_url):
+    """Extract Eightfold's required domain parameter from the board page."""
+    if not careers_url:
+        return None
+    text = fetch_text(careers_url, headers={"Accept": "text/html"})
+    patterns = [
+        r'domain=([A-Za-z0-9._-]+\.[A-Za-z]{2,})',
+        r'"domain"\s*:\s*"([^"]+)"',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            return match.group(1)
+    return None
 
 
 def fetch_company_jobs(company):
@@ -126,15 +175,47 @@ def fetch_company_jobs(company):
             while offset < total and offset < 1000:
                 data = fetch_json(f"{api_url}?limit={page_size}&offset={offset}")
                 total = data.get("totalFound", 0)
-                all_jobs.extend(parser(data, name))
+                all_jobs.extend(parser(data, name, api))
                 offset += page_size
             return all_jobs, None
+        elif board_type == "eightfold":
+            all_jobs = []
+            page_size = 10
+            offset = 0
+            total = float("inf")
+            parser = PARSERS.get(board_type)
+            domain = api.get("domain")
+            if not domain:
+                domain = infer_eightfold_domain(company.get("careers_url", ""))
+                if domain:
+                    api["domain"] = domain
+            while offset < total and offset < 5000:
+                params = {"query": "", "location": "", "start": offset}
+                if api.get("domain"):
+                    params["domain"] = api["domain"]
+                data = fetch_json(f"{api_url}?{urlencode(params)}")
+                total = ((data.get("data") or {}).get("count") or 0)
+                jobs = parser(data, name, api)
+                if not jobs:
+                    break
+                all_jobs.extend(jobs)
+                offset += page_size
+            return all_jobs, None
+        elif board_type == "rippling":
+            parser = PARSERS.get(board_type)
+            html = fetch_text(api_url)
+            return parser(html, name, api), None
         else:
-            data = fetch_json(api_url)
+            data = fetch_json(
+                api_url,
+                method=api.get("method", "GET"),
+                body=api.get("body"),
+                headers=api.get("headers"),
+            )
             parser = PARSERS.get(board_type)
             if not parser:
                 return [], f"Unknown board type: {board_type}"
-            return parser(data, name), None
+            return parser(data, name, api), None
     except Exception as e:
         return [], str(e)
 

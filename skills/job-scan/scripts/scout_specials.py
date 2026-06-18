@@ -42,7 +42,11 @@ def resolve_apis(companies):
         if r["board"] == "unknown":
             out.append({**company, "_api": None})
         else:
-            out.append({**company, "_api": {"type": r["board"], "url": r["api"], "method": r["method"]}})
+            api_meta = {"type": r["board"], "url": r["api"], "method": r["method"]}
+            for key in ("slug", "body", "headers", "base_url", "domain", "board_url"):
+                if r.get(key) is not None:
+                    api_meta[key] = r[key]
+            out.append({**company, "_api": api_meta})
     return out
 
 
