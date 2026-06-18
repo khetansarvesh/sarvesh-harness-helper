@@ -1,9 +1,9 @@
 """
 HTTP job fetcher for ATS APIs.
 
-Fetches job listings from Greenhouse, Ashby, Lever, and Workday APIs.
-Handles Workday's POST + pagination. Provides parallel fetch with
-filtering and deduplication.
+Fetches job listings from Greenhouse, Ashby, Lever, Workday, and
+SmartRecruiters APIs. Handles paginated providers inline and provides
+parallel fetch with filtering and deduplication.
 """
 
 import json
@@ -115,6 +115,18 @@ def fetch_company_jobs(company):
                 data = fetch_json(api_url, method="POST", body={"limit": page_size, "offset": offset, "searchText": ""})
                 total = data.get("total", 0)
                 all_jobs.extend(parse_workday(data, name, api_url))
+                offset += page_size
+            return all_jobs, None
+        elif board_type == "smartrecruiters":
+            all_jobs = []
+            page_size = 100
+            offset = 0
+            total = float("inf")
+            parser = PARSERS.get(board_type)
+            while offset < total and offset < 1000:
+                data = fetch_json(f"{api_url}?limit={page_size}&offset={offset}")
+                total = data.get("totalFound", 0)
+                all_jobs.extend(parser(data, name))
                 offset += page_size
             return all_jobs, None
         else:

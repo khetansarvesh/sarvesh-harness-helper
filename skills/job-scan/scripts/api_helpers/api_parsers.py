@@ -1,7 +1,7 @@
 """
 API response parsers for job board platforms.
 
-Supports: Greenhouse, Ashby, Lever, Workday.
+Supports: Greenhouse, Ashby, Lever, Workday, SmartRecruiters.
 Each parser takes the raw API JSON response and returns a list of job dicts:
   {"title": str, "url": str, "company": str, "location": str, "posted_at": datetime|None}
 """
@@ -98,8 +98,24 @@ def parse_workday(data, company_name, base_url):
     ]
 
 
+def parse_smartrecruiters(data, company_name):
+    """Parse SmartRecruiters postings response."""
+    jobs = data.get("content", [])
+    return [
+        {
+            "title": j.get("name", ""),
+            "url": j.get("applyUrl", "") or f"https://jobs.smartrecruiters.com/{(j.get('company') or {}).get('identifier', company_name)}/{j.get('id', '')}",
+            "company": company_name,
+            "location": ((j.get("location") or {}).get("fullLocation") or ""),
+            "posted_at": parse_date(j.get("releasedDate")),
+        }
+        for j in jobs
+    ]
+
+
 PARSERS = {
     "greenhouse": parse_greenhouse,
     "ashby": parse_ashby,
     "lever": parse_lever,
+    "smartrecruiters": parse_smartrecruiters,
 }

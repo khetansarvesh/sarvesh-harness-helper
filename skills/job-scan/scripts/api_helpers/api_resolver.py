@@ -2,7 +2,7 @@
 """
 Resolve a careers page URL to its public API endpoint.
 
-Supports 4 job boards: Greenhouse, Ashby, Lever, Workday.
+Supports public APIs for Greenhouse, Ashby, Lever, Workday, and SmartRecruiters.
 
 Usage:
   python3 api_resolver.py https://jobs.ashbyhq.com/cohere
@@ -23,8 +23,10 @@ def identify_board(url):
         return "ashby"
     if re.search(r"jobs\.lever\.co", url):
         return "lever"
-    if re.search(r"job-boards(?:\.eu)?\.greenhouse\.io", url):
+    if re.search(r"(?:job-boards(?:\.eu)?|boards)\.greenhouse\.io", url):
         return "greenhouse"
+    if re.search(r"careers\.smartrecruiters\.com", url, re.IGNORECASE):
+        return "smartrecruiters"
     if re.search(r"\.wd\d+\.myworkdayjobs\.com", url):
         return "workday"
     return "unknown"
@@ -43,7 +45,14 @@ def extract_slug(url, board):
         return match.group(1) if match else None
 
     if board == "greenhouse":
-        match = re.search(r"job-boards(?:\.eu)?\.greenhouse\.io/([^/?#]+)", url)
+        match = re.search(r"[?&]for=([^&#]+)", url)
+        if match:
+            return match.group(1)
+        match = re.search(r"(?:job-boards(?:\.eu)?|boards)\.greenhouse\.io/([^/?#]+)", url)
+        return match.group(1) if match else None
+
+    if board == "smartrecruiters":
+        match = re.search(r"careers\.smartrecruiters\.com/([^/?#]+)", url, re.IGNORECASE)
         return match.group(1) if match else None
 
     if board == "workday":
@@ -90,6 +99,12 @@ def build_api(board, slug):
         return {
             "api": f"https://{company}.{wd}.myworkdayjobs.com/wday/cxs/{company}/{site}/jobs",
             "method": "POST",
+        }
+
+    if board == "smartrecruiters" and slug:
+        return {
+            "api": f"https://api.smartrecruiters.com/v1/companies/{slug}/postings",
+            "method": "GET",
         }
 
     return {"api": None, "method": None}
