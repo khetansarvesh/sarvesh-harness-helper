@@ -20,9 +20,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 from scripts.notion.db_applications import load_dedup_sets, add_scanned_jobs_batch
 from scripts.notion.page_preferences import build_title_filter
 
-# Import US location filter (add parent of job-scan scripts to path)
+# Import US location filter and location enrichment
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 from api_helpers.api_job_fetcher import is_us_location
+from enrich_location import enrich_locations
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIVENESS_SCRIPT = os.path.join(SCRIPT_DIR, "liveness_helpers", "check-liveness.mjs")
@@ -308,6 +309,9 @@ def main():
     if not filtered:
         print("No candidates passed title filter.")
         return
+
+    # Step 1.4: Location enrichment — fill missing locations from ATS APIs
+    enrich_locations(filtered)
 
     # Step 1.5: Location filter (US only)
     filtered = apply_location_filter(filtered)

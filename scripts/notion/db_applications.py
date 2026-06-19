@@ -38,7 +38,7 @@ VALID_STATUSES = [
 
 # ── Add scanned jobs ────────────────────────────────────────────────
 
-def add_scanned_job(company, role, url, source=None):
+def add_scanned_job(company, role, url, source=None, location=None):
     """Add a single scanned job row to Notion."""
     properties = {
         "Report": {"title": [{"text": {"content": "Report"}}]},
@@ -51,6 +51,8 @@ def add_scanned_job(company, role, url, source=None):
         properties["URL"] = {"url": url}
     if source:
         properties["Source"] = {"select": {"name": source}}
+    if location:
+        properties["Location"] = {"rich_text": [{"text": {"content": location}}]}
 
     result = notion_request("pages", method="POST", data={
         "parent": {"database_id": NOTION_DB_APPLICATIONS},
@@ -74,14 +76,21 @@ def add_scanned_jobs_batch(jobs):
     """Add multiple scanned jobs to Notion.
 
     Args:
-        jobs: List of dicts with "company", "role", "url" keys.
+        jobs: List of dicts with "company", "role", "url" keys,
+              optional "location" and "source" keys.
 
     Returns:
         Dict with "success", "count", "results".
     """
     results = []
     for job in jobs:
-        result = add_scanned_job(job["company"], job["role"], job.get("url"), source=job.get("source"))
+        result = add_scanned_job(
+            job["company"],
+            job["role"],
+            job.get("url"),
+            source=job.get("source"),
+            location=job.get("location"),
+        )
         results.append(result)
     return {"success": True, "count": len(results), "results": results}
 
