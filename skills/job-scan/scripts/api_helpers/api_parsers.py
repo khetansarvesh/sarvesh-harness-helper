@@ -23,11 +23,17 @@ def parse_date(value):
 
 
 def parse_workday_date(text):
-    """Parse Workday's 'Posted Today' / 'Posted 3 Days Ago' text."""
+    """Parse Workday's 'Posted Today' / 'Posted Yesterday' / 'Posted 3 Days Ago' / 'Posted 30+ Days Ago' text."""
     if not text:
         return None
     if re.search(r"today", text, re.IGNORECASE):
         return datetime.now(timezone.utc)
+    if re.search(r"yesterday", text, re.IGNORECASE):
+        # "Yesterday" could be 24-48h ago; use 36h to ensure it's filtered
+        # out by a 24h cutoff but passes a 48h (2-day) cutoff
+        return datetime.now(timezone.utc) - timedelta(hours=36)
+    if re.search(r"30\+\s*days?\s*ago", text, re.IGNORECASE):
+        return datetime.now(timezone.utc) - timedelta(days=31)  # Treat as 31 days ago
     match = re.search(r"(\d+)\s*days?\s*ago", text, re.IGNORECASE)
     if match:
         return datetime.now(timezone.utc) - timedelta(days=int(match.group(1)))
