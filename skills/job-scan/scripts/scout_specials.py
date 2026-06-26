@@ -57,8 +57,12 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Preview without writing")
     parser.add_argument("--company", default=None, help="Scan only this company (substring match)")
     parser.add_argument("--hours", type=int, default=24, help="Only jobs posted in the last N hours (default: 24)")
-    parser.add_argument("--category", nargs="+", default=["Dream", "Big-Tech"],
-                        help="Notion company categories to scan (default: Dream Big-Tech)")
+    # Default: scan ALL companies in the Notion Companies DB (no category filter).
+    # To restrict to specific categories, pass --category Dream Big-Tech etc.
+    # parser.add_argument("--category", nargs="+", default=["Dream", "Big-Tech"],
+    #                     help="Notion company categories to scan (default: Dream Big-Tech)")
+    parser.add_argument("--category", nargs="+", default=None,
+                        help="Notion company categories to scan (default: ALL companies)")
     args = parser.parse_args()
 
     # 1. Load companies from Notion

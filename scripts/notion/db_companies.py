@@ -26,16 +26,21 @@ def load_companies(categories):
     """Load companies from Notion, filtered by category.
 
     Args:
-        categories: List of category names (e.g., ["Dream", "Big-Tech"])
+        categories: List of category names (e.g., ["Dream", "Big-Tech"]),
+                    or None to load ALL companies (no category filter).
 
     Returns:
         List of dicts: [{"name": str, "careers_url": str, "categories": [str]}]
     """
-    category_filters = [
-        {"property": "Category", "multi_select": {"contains": cat}}
-        for cat in categories
-    ]
-    filter_body = {"or": category_filters} if len(category_filters) > 1 else category_filters[0]
+    if categories is None:
+        # No category filter — load every company in the DB
+        filter_body = None
+    else:
+        category_filters = [
+            {"property": "Category", "multi_select": {"contains": cat}}
+            for cat in categories
+        ]
+        filter_body = {"or": category_filters} if len(category_filters) > 1 else category_filters[0]
 
     rows = load_all_rows(NOTION_DB_COMPANIES, filter_body)
 
