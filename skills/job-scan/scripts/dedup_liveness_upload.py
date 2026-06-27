@@ -30,14 +30,16 @@ LIVENESS_SCRIPT = os.path.join(SCRIPT_DIR, "liveness_helpers", "check-liveness.m
 
 
 def normalize_source(raw: str) -> str | None:
-    """Map raw source strings to Notion select values: API, Web Search, User, Jobright."""
+    """Map raw source strings to Notion select values."""
     if not raw:
         return None
     raw = raw.strip().lower()
     if raw.endswith("-api"):
         return "API"
-    if raw in ("web_search", "career_crawl"):
-        return "Web Search"
+    if raw == "web_search":
+        return "Broad Web Search"
+    if raw == "career_crawl":
+        return "Fallback Web Search"
     if raw == "user_input":
         return "User"
     if raw == "jobright":
