@@ -11,8 +11,11 @@ Usage (CLI):
 
 import json
 import os
+import socket
 import sys
+import time
 import urllib.request
+from urllib.error import HTTPError, URLError
 
 try:
     from .config import NOTION_TOKEN, NOTION_API
@@ -21,7 +24,7 @@ except ImportError:
     from config import NOTION_TOKEN, NOTION_API
 
 
-def notion_request(endpoint, method="POST", data=None):
+def notion_request(endpoint, method="POST", data=None, timeout=30, max_retries=5):
     """Make an authenticated request to the Notion API.
 
     Args:
@@ -47,13 +50,39 @@ def notion_request(endpoint, method="POST", data=None):
     if data:
         req.data = json.dumps(data).encode()
 
-    try:
-        with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        body = e.read().decode()
-        print(json.dumps({"success": False, "error": f"HTTP {e.code}: {body[:200]}"}), file=sys.stderr)
-        sys.exit(1)
+    attempt = 0
+    while True:
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return json.loads(resp.read())
+        except HTTPError as e:
+            body = e.read().decode()
+            if e.code in {429, 500, 502, 503, 504} and attempt < max_retries:
+                retry_after = e.headers.get("Retry-After")
+                delay = float(retry_after) if retry_after else min(2 ** attempt, 30)
+                print(
+                    f"Retrying Notion request after HTTP {e.code} in {delay:.1f}s: {endpoint}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                time.sleep(delay)
+                attempt += 1
+                continue
+            print(json.dumps({"success": False, "error": f"HTTP {e.code}: {body[:200]}"}), file=sys.stderr)
+            sys.exit(1)
+        except (TimeoutError, socket.timeout, URLError) as e:
+            if attempt < max_retries:
+                delay = min(2 ** attempt, 30)
+                print(
+                    f"Retrying Notion request after network error in {delay:.1f}s: {endpoint} ({e})",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                time.sleep(delay)
+                attempt += 1
+                continue
+            print(json.dumps({"success": False, "error": f"Network error: {e}"}), file=sys.stderr)
+            sys.exit(1)
 
 
 def notion_post(path, body=None):

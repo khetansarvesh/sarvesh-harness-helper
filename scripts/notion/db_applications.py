@@ -25,10 +25,12 @@ from datetime import date
 try:
     from .notion_client import notion_request, load_all_rows
     from .config import NOTION_TOKEN, NOTION_API, NOTION_DB_APPLICATIONS
+    from .company_matcher import match_company_name
 except ImportError:
     sys.path.insert(0, os.path.dirname(__file__))
     from notion_client import notion_request, load_all_rows
     from config import NOTION_TOKEN, NOTION_API, NOTION_DB_APPLICATIONS
+    from company_matcher import match_company_name
 
 VALID_STATUSES = [
     "Scanned", "Evaluated", "Almost Applied", "Applied", "Responded",
@@ -37,6 +39,27 @@ VALID_STATUSES = [
 
 
 # ── Add scanned jobs ────────────────────────────────────────────────
+
+def resolve_about_company_relation(company):
+    """Return a single-page relation payload for About_Company, if confidently matched."""
+    result = match_company_name(company)
+    if result.get("status") != "matched":
+        return None
+    match = result.get("match") or {}
+    if not match.get("page_id"):
+        return None
+    return [{"id": match["page_id"]}]
+
+
+def update_about_company(page_id, company_page_id):
+    """Set the About_Company relation for an application page."""
+    notion_request(
+        f"pages/{page_id}",
+        method="PATCH",
+        data={"properties": {"About_Company": {"relation": [{"id": company_page_id}]}}},
+    )
+    return {"success": True, "page_id": page_id, "company_page_id": company_page_id}
+
 
 def add_scanned_job(company, role, url, source=None, location=None):
     """Add a single scanned job row to Notion."""
@@ -53,6 +76,9 @@ def add_scanned_job(company, role, url, source=None, location=None):
         properties["Source"] = {"select": {"name": source}}
     if location:
         properties["Location"] = {"rich_text": [{"text": {"content": location}}]}
+    about_company_relation = resolve_about_company_relation(company)
+    if about_company_relation:
+        properties["About_Company"] = {"relation": about_company_relation}
 
     result = notion_request("pages", method="POST", data={
         "parent": {"database_id": NOTION_DB_APPLICATIONS},
@@ -69,6 +95,7 @@ def add_scanned_job(company, role, url, source=None, location=None):
         "role": role,
         "url": url,
         "status": "Scanned",
+        "about_company_linked": bool(about_company_relation),
     }
 
 
