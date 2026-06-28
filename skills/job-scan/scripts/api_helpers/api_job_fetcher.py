@@ -52,7 +52,7 @@ _US_KEYWORDS = re.compile(
 
 _NON_US_KEYWORDS = re.compile(
     r"\bIndia\b|\bGermany\b|\bFrance\b|\bJapan\b|\bChina\b|\bKorea\b"
-    r"|\bSingapore\b|\bTaiwan\b|\bIreland\b|\bCanada\b|\bBrazil\b"
+    r"|\bSingapore\b|\bTaiwan\b|\bIreland\b|\bCanada\b|\bBrazil\b|\bIndonesia\b"
     r"|\bMexico\b|\bAustralia\b|\bIsrael\b|\bSpain\b|\bItaly\b"
     r"|\bNetherlands\b|\bSweden\b|\bSwitzerland\b|\bPoland\b|\bNorway\b"
     r"|\bSerbia\b|\bEstonia\b|\bPune\b"

@@ -38,9 +38,11 @@ def normalize_source(raw: str) -> str | None:
     raw = raw.strip().lower()
     if raw.endswith("-api"):
         return "API"
-    if raw == "web_search":
+    # Step 2: broad ATS-wide discovery queries
+    if raw in ("web_search", "broad_web_search"):
         return "Broad Web Search"
-    if raw == "career_crawl":
+    # Step 1.5: targeted WebSearch for skipped companies (direct job URLs or crawled pages)
+    if raw in ("career_crawl", "fallback_web_search"):
         return "Fallback Web Search"
     if raw == "user_input":
         return "User"
