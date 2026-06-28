@@ -119,7 +119,10 @@ def main():
             print("\n(dry run — run without --dry-run to save results)")
         else:
             print(f"\nCandidates saved to {CANDIDATE_STORE}")
-            print(f"Run: python3 skills/job-scan/scripts/dedup_liveness_upload.py {CANDIDATE_STORE}")
+            print(
+                "Run: "
+                f"python3 skills/job-scan/scripts/dedup_liveness_upload.py {CANDIDATE_STORE} --hours {args.hours}"
+            )
 
     print(f"\n→ Next: dedup_liveness_upload.py to push to Notion, then job-eval to evaluate.")
 

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Location enrichment for job candidates.
+Enrich ATS posted_at for web-search candidates and enforce a time window.
 
-For candidates with no location data, resolve the underlying ATS posting and
-copy its location onto the candidate before the location filter runs.
+This is used by dedup_liveness_upload.py so broad web-search results are
+validated against the underlying ATS posting timestamp instead of relying only
+on search-engine freshness.
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ import os
 import re
 import sys
 from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlsplit, urlunsplit
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "api_helpers"))
@@ -81,38 +83,58 @@ def _match_job(candidate_url: str, board: str, jobs: list[dict]) -> dict | None:
     return None
 
 
-def enrich_locations(candidates):
-    """Enrich location data for all candidates missing it.
-
-    Returns:
-        (enriched_count, error_count)
+def enforce_web_search_posted_at_window(candidates: list[dict], hours: int):
     """
-    needs_enrichment = [c for c in candidates if not c.get("location", "").strip()]
+    Resolve ATS posted_at for web_search candidates and filter out stale rows.
 
-    if not needs_enrichment:
-        print(f"  Location enrichment: all {len(candidates)} candidates already have location data")
-        return 0, 0
+    Returns (surviving_candidates, stats).
+    """
+    if hours <= 0:
+        return candidates, {
+            "considered": 0,
+            "supported": 0,
+            "resolved": 0,
+            "filtered_old": 0,
+            "unresolved": 0,
+            "api_errors": 0,
+            "hours": hours,
+        }
 
-    print(f"  Location enrichment: {len(needs_enrichment)} candidates need location lookup")
-
-    grouped = defaultdict(list)
-    unsupported = 0
-    for candidate in needs_enrichment:
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+    targets = []
+    for candidate in candidates:
+        if candidate.get("source") != "web_search":
+            continue
         url = candidate.get("url", "")
         board = detect_board(url)
         slug = extract_slug(url, board)
         api_info = build_api(board, slug) if board != "unknown" else None
         if not api_info or not api_info.get("api"):
-            unsupported += 1
             continue
+        targets.append((candidate, board, slug, api_info))
+
+    if not targets:
+        return candidates, {
+            "considered": 0,
+            "supported": 0,
+            "resolved": 0,
+            "filtered_old": 0,
+            "unresolved": 0,
+            "api_errors": 0,
+            "hours": hours,
+        }
+
+    grouped = defaultdict(list)
+    for candidate, board, slug, api_info in targets:
         grouped[(board, _slug_group_key(slug))].append((candidate, slug, api_info))
 
-    enriched = 0
-    errors = 0
-    board_stats = defaultdict(lambda: {"enriched": 0, "errors": 0})
+    stale_urls = set()
+    resolved = 0
+    unresolved = 0
+    api_errors = 0
 
     for (board, _slug_key), items in grouped.items():
-        candidate, _, api_info = items[0]
+        candidate, slug, api_info = items[0]
         wrapped_api = dict(api_info)
         wrapped_api["url"] = api_info["api"]
         company_payload = {
@@ -122,31 +144,32 @@ def enrich_locations(candidates):
         }
         jobs, error = fetch_company_jobs(company_payload)
         if error:
-            errors += len(items)
-            board_stats[board]["errors"] += len(items)
+            api_errors += len(items)
             continue
 
         for candidate, _, _ in items:
             matched = _match_job(candidate.get("url", ""), board, jobs)
             if not matched:
+                unresolved += 1
                 continue
-            location = (matched.get("location") or "").strip()
-            if not location:
+
+            posted_at = matched.get("posted_at")
+            if posted_at is None:
+                unresolved += 1
                 continue
-            candidate["location"] = location
-            enriched += 1
-            board_stats[board]["enriched"] += 1
 
-    for board in sorted(board_stats):
-        stats = board_stats[board]
-        if stats["enriched"] > 0 or stats["errors"] > 0:
-            print(f"    {board}: {stats['enriched']} enriched, {stats['errors']} API errors")
+            resolved += 1
+            candidate["posted_at"] = posted_at.isoformat()
+            if posted_at < cutoff:
+                stale_urls.add(candidate.get("url", ""))
 
-    still_missing = sum(1 for c in needs_enrichment if not c.get("location", "").strip())
-    if still_missing > 0:
-        print(f"    {still_missing} candidates still without location (unsupported ATS or unresolved match)")
-    if unsupported > 0:
-        print(f"    {unsupported} candidates on unsupported/unknown boards")
-
-    print(f"  Location enrichment: {enriched} enriched, {errors} errors")
-    return enriched, errors
+    surviving = [c for c in candidates if c.get("url", "") not in stale_urls]
+    return surviving, {
+        "considered": len(targets),
+        "supported": len(targets),
+        "resolved": resolved,
+        "filtered_old": len(stale_urls),
+        "unresolved": unresolved,
+        "api_errors": api_errors,
+        "hours": hours,
+    }

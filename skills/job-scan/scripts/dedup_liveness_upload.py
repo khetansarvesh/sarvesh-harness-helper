@@ -15,6 +15,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import argparse
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 from scripts.notion.db_applications import load_dedup_sets, add_scanned_jobs_batch
@@ -24,6 +25,7 @@ from scripts.notion.page_preferences import build_title_filter
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 from api_helpers.api_job_fetcher import is_us_location
 from enrich_location import enrich_locations
+from enrich_posted_at import enforce_web_search_posted_at_window
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIVENESS_SCRIPT = os.path.join(SCRIPT_DIR, "liveness_helpers", "check-liveness.mjs")
@@ -285,12 +287,21 @@ def upload(jobs, candidate_file):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 dedup_liveness_upload.py <candidate_store.json> [--skip-liveness]", file=sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Filter, deduplicate, liveness check, and upload candidates to Notion."
+    )
+    parser.add_argument("candidate_file", help="Path to candidate_store.json")
+    parser.add_argument(
+        "--hours",
+        type=int,
+        default=24,
+        help="Reject broad web-search ATS jobs older than this many hours (default: 24)",
+    )
+    parser.add_argument("--skip-liveness", action="store_true", help="Skip Playwright liveness checks")
+    args = parser.parse_args()
 
-    candidate_file = sys.argv[1]
-    skip_liveness = "--skip-liveness" in sys.argv
+    candidate_file = args.candidate_file
+    skip_liveness = args.skip_liveness
 
     if not os.path.exists(candidate_file):
         print(f"Error: {candidate_file} not found.", file=sys.stderr)
@@ -327,6 +338,21 @@ def main():
 
     if not filtered:
         print("No candidates passed URL filter.")
+        return
+
+    # Step 1.7: Enforce ATS posted_at window for broad web-search ATS URLs
+    filtered, posted_stats = enforce_web_search_posted_at_window(filtered, args.hours)
+    if posted_stats["considered"] > 0:
+        print(
+            "  Broad search ATS posted_at: "
+            f"{posted_stats['resolved']} resolved, "
+            f"{posted_stats['filtered_old']} older than {posted_stats['hours']}h filtered out, "
+            f"{posted_stats['unresolved']} unresolved, "
+            f"{posted_stats['api_errors']} API errors"
+        )
+
+    if not filtered:
+        print("No candidates passed broad-search ATS posted_at filtering.")
         return
 
     # Step 2: Dedup
