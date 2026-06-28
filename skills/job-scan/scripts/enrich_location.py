@@ -10,75 +10,13 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import sys
 from collections import defaultdict
-from urllib.parse import urlsplit, urlunsplit
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "api_helpers"))
 from api_resolver import identify_board as detect_board, extract_slug, build_api
 from api_job_fetcher import fetch_company_jobs
-
-
-def _normalize_url(url: str) -> str:
-    if not url:
-        return ""
-    parts = urlsplit(url)
-    path = re.sub(r"/+", "/", parts.path).rstrip("/") or "/"
-    return urlunsplit((parts.scheme.lower(), parts.netloc.lower(), path, "", ""))
-
-
-def _extract_job_key(url: str, board: str):
-    if not url:
-        return None
-    path = urlsplit(url).path.rstrip("/")
-    if board == "ashby":
-        match = re.search(
-            r"/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:/application)?$",
-            path,
-            re.IGNORECASE,
-        )
-        return match.group(1).lower() if match else None
-    if board == "lever":
-        match = re.search(
-            r"/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:/apply)?$",
-            path,
-            re.IGNORECASE,
-        )
-        return match.group(1).lower() if match else None
-    if board == "greenhouse":
-        match = re.search(r"/jobs/(\d+)$", path)
-        return match.group(1) if match else None
-    if board == "workable":
-        match = re.search(r"/j/([A-Z0-9]+)(?:/apply)?$", path, re.IGNORECASE)
-        return match.group(1).upper() if match else None
-    if board == "workday":
-        return path
-    return None
-
-
-def _slug_group_key(slug):
-    return json.dumps(slug, sort_keys=True, default=str)
-
-
-def _match_job(candidate_url: str, board: str, jobs: list[dict]) -> dict | None:
-    target_norm = _normalize_url(candidate_url)
-    target_key = _extract_job_key(candidate_url, board)
-
-    for job in jobs:
-        if _normalize_url(job.get("url", "")) == target_norm:
-            return job
-
-    if target_key:
-        for job in jobs:
-            if _extract_job_key(job.get("url", ""), board) == target_key:
-                return job
-
-    target_path = urlsplit(target_norm).path
-    for job in jobs:
-        if urlsplit(_normalize_url(job.get("url", ""))).path == target_path:
-            return job
-    return None
+from candidate_matching import match_job, slug_group_key
 
 
 def enrich_locations(candidates):
@@ -105,7 +43,7 @@ def enrich_locations(candidates):
         if not api_info or not api_info.get("api"):
             unsupported += 1
             continue
-        grouped[(board, _slug_group_key(slug))].append((candidate, slug, api_info))
+        grouped[(board, slug_group_key(slug))].append((candidate, slug, api_info))
 
     enriched = 0
     errors = 0
@@ -127,7 +65,7 @@ def enrich_locations(candidates):
             continue
 
         for candidate, _, _ in items:
-            matched = _match_job(candidate.get("url", ""), board, jobs)
+            matched = match_job(candidate.get("url", ""), board, jobs)
             if not matched:
                 continue
             location = (matched.get("location") or "").strip()

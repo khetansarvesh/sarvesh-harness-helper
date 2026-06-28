@@ -25,6 +25,7 @@ from scripts.notion.page_preferences import build_title_filter
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 from api_helpers.api_job_fetcher import is_us_location
 from enrich_location import enrich_locations
+from enrich_fallback_posted_at import enforce_fallback_posted_at_window
 from enrich_posted_at import enforce_web_search_posted_at_window
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -297,7 +298,7 @@ def main():
         "--hours",
         type=int,
         default=24,
-        help="Reject broad web-search ATS jobs older than this many hours (default: 24)",
+        help="Reject web-search and fallback jobs older than this many hours when posted_at is resolvable (default: 24)",
     )
     parser.add_argument("--skip-liveness", action="store_true", help="Skip Playwright liveness checks")
     args = parser.parse_args()
@@ -325,24 +326,14 @@ def main():
         print("No candidates passed title filter.")
         return
 
-    # Step 1.4: Location enrichment — fill missing locations from ATS APIs
-    enrich_locations(filtered)
-
-    # Step 1.5: Location filter (US only)
-    filtered = apply_location_filter(filtered)
-
-    if not filtered:
-        print("No candidates passed location filter.")
-        return
-
-    # Step 1.6: URL specificity filter (block landing/category pages)
+    # Step 1.4: URL specificity filter (block landing/category pages)
     filtered = apply_url_filter(filtered)
 
     if not filtered:
         print("No candidates passed URL filter.")
         return
 
-    # Step 1.7: Enforce ATS posted_at window for broad web-search ATS URLs
+    # Step 1.5: Enforce ATS posted_at window for broad web-search ATS URLs
     filtered, posted_stats = enforce_web_search_posted_at_window(filtered, args.hours)
     if posted_stats["considered"] > 0:
         print(
@@ -355,6 +346,33 @@ def main():
 
     if not filtered:
         print("No candidates passed broad-search ATS posted_at filtering.")
+        return
+
+    # Step 1.6: Enforce posted_at window for targeted fallback/career-crawl jobs
+    filtered, fallback_stats = enforce_fallback_posted_at_window(filtered, args.hours)
+    if fallback_stats["considered"] > 0:
+        print(
+            "  Fallback posted_at: "
+            f"{fallback_stats['resolved']} resolved, "
+            f"{fallback_stats['filtered_old']} older than {fallback_stats['hours']}h filtered out, "
+            f"{fallback_stats['unresolved']} unresolved, "
+            f"{fallback_stats['errors']} errors"
+        )
+        if fallback_stats.get("report_path"):
+            print(f"    Report: {fallback_stats['report_path']}")
+
+    if not filtered:
+        print("No candidates passed fallback posted_at filtering.")
+        return
+
+    # Step 1.7: Location enrichment — fill missing locations from ATS APIs
+    enrich_locations(filtered)
+
+    # Step 1.8: Location filter (US only)
+    filtered = apply_location_filter(filtered)
+
+    if not filtered:
+        print("No candidates passed location filter.")
         return
 
     # Step 2: Dedup
