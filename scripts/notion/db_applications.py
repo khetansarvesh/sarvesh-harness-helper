@@ -226,7 +226,13 @@ def parse_inline(text):
                 rich_text.append({"type": "text", "text": {"content": plain}})
 
         if match.group(2):
-            rich_text.append({"type": "text", "text": {"content": match.group(2)}, "annotations": {"bold": True}})
+            bold_content = match.group(2)
+            # Check if bold content contains a link: **[text](url)**
+            link_in_bold = re.match(r"^\[(.+?)\]\((.+?)\)$", bold_content)
+            if link_in_bold:
+                rich_text.append({"type": "text", "text": {"content": link_in_bold.group(1), "link": {"url": link_in_bold.group(2)}}, "annotations": {"bold": True}})
+            else:
+                rich_text.append({"type": "text", "text": {"content": bold_content}, "annotations": {"bold": True}})
         elif match.group(4):
             rich_text.append({"type": "text", "text": {"content": match.group(4)}, "annotations": {"italic": True}})
         elif match.group(6):
