@@ -27,7 +27,7 @@ import time
 import urllib.request
 import urllib.error
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait as futures_wait, FIRST_COMPLETED
 from urllib.parse import quote, urlencode
 
 from api_helpers.api_parsers import PARSERS, parse_applytojob_date, parse_icims_date, parse_relative_age_text, parse_workday
@@ -694,49 +694,91 @@ def fetch_and_filter(targets, title_filter, cutoff, concurrency=10):
     # Intra-scan dedup (same URL found across multiple companies in one scan)
     seen_urls = set()
 
-    def process_batch(batch, max_workers):
+    # Hard wall-clock timeout per company. urlopen's per-socket timeout does not
+    # protect against slow-drip servers (a host that trickles bytes slower than the
+    # socket timeout keeps the connection alive indefinitely). This caps the total
+    # time any single company fetch can block the batch.
+    PER_COMPANY_TIMEOUT_S = 90
+    POLL_INTERVAL_S = 5
+
+    def _process_jobs(company, jobs, error):
         nonlocal total_found, total_filtered, total_dupes
+        if error:
+            errors.append({"company": company.get("name", "?"), "error": error})
+            return
+        total_found += len(jobs)
+        for job in jobs:
+            # Hours filter
+            if cutoff and job["posted_at"] and job["posted_at"] < cutoff:
+                total_filtered += 1
+                continue
+            # Title filter
+            if not title_filter(job["title"]):
+                total_filtered += 1
+                continue
+            # Location filter — US only
+            if not is_us_location(job.get("location", "")):
+                total_filtered += 1
+                continue
+            # Intra-scan URL dedup
+            if job["url"] in seen_urls:
+                total_dupes += 1
+                continue
+
+            seen_urls.add(job["url"])
+            new_offers.append({
+                "company": job["company"],
+                "role": job["title"],
+                "url": job["url"],
+                "location": job.get("location", ""),
+                "source": f"{company['_api']['type']}-api",
+            })
+
+    # Process in chunks so a few hung fetches can't hold all worker slots and
+    # starve the rest of the queue. Each chunk gets a fresh pool; abandoned/hung
+    # worker threads from a chunk keep running in the background but don't block
+    # subsequent chunks.
+    CHUNK_SIZE = 50
+
+    def process_batch(batch, max_workers):
         if not batch:
             return
-        with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            futures = {pool.submit(fetch_company_jobs, c): c for c in batch}
+        for i in range(0, len(batch), CHUNK_SIZE):
+            _process_chunk(batch[i:i + CHUNK_SIZE], max_workers)
 
-            for future in as_completed(futures):
-                company = futures[future]
-                jobs, error = future.result()
-
-                if error:
-                    errors.append({"company": company.get("name", "?"), "error": error})
-                    continue
-
-                total_found += len(jobs)
-
-                for job in jobs:
-                    # Hours filter
-                    if cutoff and job["posted_at"] and job["posted_at"] < cutoff:
-                        total_filtered += 1
-                        continue
-                    # Title filter
-                    if not title_filter(job["title"]):
-                        total_filtered += 1
-                        continue
-                    # Location filter — US only
-                    if not is_us_location(job.get("location", "")):
-                        total_filtered += 1
-                        continue
-                    # Intra-scan URL dedup
-                    if job["url"] in seen_urls:
-                        total_dupes += 1
-                        continue
-
-                    seen_urls.add(job["url"])
-                    new_offers.append({
-                        "company": job["company"],
-                        "role": job["title"],
-                        "url": job["url"],
-                        "location": job.get("location", ""),
-                        "source": f"{company['_api']['type']}-api",
+    def _process_chunk(chunk, max_workers):
+        pool = ThreadPoolExecutor(max_workers=min(max_workers, len(chunk)))
+        try:
+            futures = {pool.submit(fetch_company_jobs, c): c for c in chunk}
+            start_times = {f: time.monotonic() for f in futures}
+            pending = set(futures)
+            while pending:
+                # Abandon any futures that exceeded the wall-clock cap.
+                now = time.monotonic()
+                for future in [f for f in pending if now - start_times[f] > PER_COMPANY_TIMEOUT_S]:
+                    company = futures[future]
+                    errors.append({
+                        "company": company.get("name", "?"),
+                        "error": f"wall-clock timeout after {PER_COMPANY_TIMEOUT_S}s",
                     })
+                    future.cancel()
+                    pending.discard(future)
+                if not pending:
+                    break
+                done, pending = futures_wait(
+                    pending, timeout=POLL_INTERVAL_S, return_when=FIRST_COMPLETED
+                )
+                for future in done:
+                    company = futures[future]
+                    try:
+                        jobs, error = future.result(timeout=0.1)
+                    except Exception as e:
+                        _process_jobs(company, [], f"fetch exception: {e}")
+                        continue
+                    _process_jobs(company, jobs, error)
+        finally:
+            # Non-blocking shutdown: don't wait for abandoned/hung worker threads.
+            pool.shutdown(wait=False, cancel_futures=True)
 
     grouped = defaultdict(list)
     for target in targets:
