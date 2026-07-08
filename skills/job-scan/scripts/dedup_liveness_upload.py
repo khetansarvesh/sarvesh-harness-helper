@@ -301,10 +301,12 @@ def main():
         help="Reject web-search and fallback jobs older than this many hours when posted_at is resolvable (default: 24)",
     )
     parser.add_argument("--skip-liveness", action="store_true", help="Skip Playwright liveness checks")
+    parser.add_argument("--skip-upload", action="store_true", help="Run filter/dedup/liveness only; do NOT upload to Notion or clear the candidate store")
     args = parser.parse_args()
 
     candidate_file = args.candidate_file
     skip_liveness = args.skip_liveness
+    skip_upload = args.skip_upload
 
     if not os.path.exists(candidate_file):
         print(f"Error: {candidate_file} not found.", file=sys.stderr)
@@ -394,7 +396,11 @@ def main():
         job["source"] = normalize_source(job.get("source", ""))
 
     # Step 4: Upload
-    upload(surviving, candidate_file)
+    if skip_upload:
+        print(f"Skipping upload (--skip-upload). {len(surviving)} jobs would have been uploaded to Notion.")
+        print("Candidate store left untouched.")
+    else:
+        upload(surviving, candidate_file)
 
 
 if __name__ == "__main__":
