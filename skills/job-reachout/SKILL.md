@@ -36,6 +36,8 @@ After a job application is submitted, a well-researched cold message to the righ
 7. **One concrete ask** — always end with a specific, low-friction request (usually "20-min chat to compare what I built vs. what you're building")
 8. **ALWAYS write findings back to Notion** in batch mode — the full reachout section (team, mapping, contacts, draft, why-it-works) goes under a `## Reachout` header on the job's Notion page. The chat shows the draft for copy-paste; Notion is the persistent record.
 9. **NEVER overwrite an existing Reachout section** — if a page already has one, skip it (re-runs produce a new dated section, preserving history). Always check before writing.
+10. **SHORT MESSAGES ONLY — this is the #1 reason cold messages get ignored.** Hard limits: email body ≤120 words, LinkedIn DM ≤80 words. Pick exactly **2 projects** from the user's profile — not 3, not 4. Each project gets **one bullet line**: bold hyperlinked project name + the company concept it maps to + one headline metric. No sub-bullets, no expansion, no "happy to come to your office / jump on a call / send a demo" menu. If a line doesn't fit in one sentence with a number, the project is the wrong pick.
+11. **ALWAYS hyperlink the project name** — if the project has a public link (arXiv paper, GitHub repo, Medium write-up), the project name in the message MUST be a clickable hyperlink. Find the link in Step 3.2.5. Format in markdown: `**[ROMA](https://arxiv.org/...)**` — the shared Notion parser renders this as bold + linked. If no public link exists, leave the name bold-only (`**ROMA**`).
 
 ## The Process
 
@@ -175,15 +177,42 @@ python3 scripts/notion/page_reader.py {project_name}
 
 For each of the user's projects, check if it maps to a concept from the company's thesis. Write it as a table:
 
-| Company concept | User's project | How it maps |
-|---|---|---|
-| (from their blog/paper) | (user's project name) | (1 sentence on the technical mapping) |
+| Company concept | User's project | How it maps | Link |
+|---|---|---|---|
+| (from their blog/paper) | (user's project name) | (1 sentence on the technical mapping) | (arXiv/GitHub/Medium URL, or —) |
 
 Rules:
 - Only include mappings that are **technically precise** — "my RAG agent is like your agent" is useless; "my TraceDB stores past traces for cross-iteration recall, which is your 'replayable learning environments'" is good
-- Aim for 3-4 strong mappings, not 10 weak ones
+- Pick exactly **2 mappings** for the message (the strongest). Build 3-4 in the table for analysis, but only the top 2 go into the draft — see Phase 5
 - Name projects on **both sides** — "my EvoSkill → your Generative Simulators"
 - Quantify the user's work (metrics, SOTA results, % improvements)
+- Populate the **Link** column via Step 3.2.5
+
+**Step 3.2.5 — Find each project's public link (REQUIRED):**
+
+For every project that might appear in the message, find its public URL. This is non-negotiable — hyperlinked project names make the message verifiable and credible in one click.
+
+Search in this order and pick the FIRST hit:
+
+1. **The user's GitHub repos** — check `https://api.github.com/users/{github_username}/repos?per_page=100` for a repo matching the project name (case-insensitive). Use `{repo.html_url}`.
+2. **arXiv** — run `web_search_exa query: "{project_name}" arxiv {user_name}` — if the user co-authored a paper, use `https://arxiv.org/abs/{id}`.
+3. **The official/org GitHub** — run `web_search_exa query: "{project_name}" github {org_name}` (e.g. "ROMA github sentient-agi") — if the project lives in an org repo the user contributed to, use that.
+4. **Medium / personal blog** — run `web_search_exa query: "site:{user_medium} {project_name}"` — if there's a project-specific write-up, use that URL.
+5. **Google Scholar** — run `web_search_exa query: "{user_name}" google scholar` — save the Scholar profile URL; use it as the fallback link for any published project that has no per-project URL.
+
+If none of the above yields a project-specific URL, leave the Link column as `—` and the name will be bold-only (not hyperlinked) in the message.
+
+**Known link inventory for the current profile (verify before reuse, links may change):**
+
+| Project | Link | Type |
+|---|---|---|
+| ROMA | https://arxiv.org/abs/2602.01848 | arXiv paper |
+| EvoSkill | https://arxiv.org/abs/2603.02766 | arXiv paper |
+| SERA | https://github.com/khetansarvesh/SERA | GitHub repo |
+| Deep Research (Strategy) | https://khetansarvesh.medium.com/search-deep-research-agents-a7b6f3ae6d32 | Medium article |
+| Google Scholar (all pubs) | https://scholar.google.com/citations?user=MSW5-VMAAAAJ | fallback |
+
+Re-run Step 3.2.5 only if the profile changes or a new project appears; otherwise this inventory can be reused across jobs in a batch.
 
 **Step 3.3 — Identify qualification gaps:**
 
@@ -245,41 +274,44 @@ Rules:
 - Include the hook (the named mapping) — that's what gets an open
 - Avoid generic subjects like "Following up on my application" or "Excited about [company]"
 
-**Step 5.2 — Message body structure:**
+**Step 5.2 — Message body structure (STAY SHORT — see Non-Negotiable #10):**
 
-**Paragraph 1 — Warm opener + status (2-3 lines):**
+Total email body: **≤120 words**. LinkedIn DM: **≤80 words**. No one reads long cold messages — every line must earn its place.
+
+**Paragraph 1 — Warm opener + status (1-2 lines, ≤30 words):**
 - Lead with the warm angle (shared university, "I saw your post about X")
-- State that you applied (so this is a signal-boost, not a substitute)
-- Name the specific role
+- State that you applied + name the role in the same line
 
-**Paragraph 2 — The mapping (the core, 4-6 lines):**
-- "The overlap with your [named work] is unusually direct:"
-- 3-4 bullet points, each mapping a user project → a company concept
-- Named projects on both sides
-- Quantified results on user's side
+**Paragraph 2 — The mapping (THE CORE, 2 bullets):**
+- Exactly **2 bullets**, one per project. Not inline text — actual bullet points (`- `).
+- Each bullet is **one line**: `**[Project](link)** → [company concept]: [headline metric with a number]`
+- The project name MUST be bold AND a hyperlink when a link exists (per Step 3.2.5). Format: `**[ROMA](https://arxiv.org/abs/2602.01848)**` — the shared Notion parser renders this as bold + clickable.
+- If no public link exists for the project, use bold-only: `**ProjectName**`.
+- The arrow (`→`) separates the project from the company concept it maps to. The colon separates concept from metric.
+- Example bullet: `**[ROMA](https://arxiv.org/abs/2602.01848)** → your hierarchical reasoning work: 10% SOTA on SEAL-0.`
+- If you can't fit the impact in one bullet line, the project isn't the right pick. Choose a different one.
 
-**Paragraph 3 — Honest caveat (1-2 lines, only if there's a gap):**
-- "The honest caveat: the listing asks for X, I have Y — but the building experience maps almost line-for-line to what you're doing."
-- Only include if there's a real gap. Don't apologize, reframe.
+**Paragraph 3 — Honest caveat (1 line, only if there's a real gap):**
+- "Honest caveat: the role asks for X, I have Y — but the building experience transfers directly."
+- Skip entirely if there's no material gap. Don't pad.
 
-**Paragraph 4 — One specific ask + low friction (2 lines):**
-- "Would 20 min to walk through what I built vs. what you're building be useful?"
-- Offer to remove friction (come to their office, jump on a call, send a demo)
-- Don't ask for a job. Ask for a conversation.
+**Paragraph 4 — One specific ask (1 line, ≤20 words):**
+- "Would 20 min to compare what I built vs. what you're building be useful?"
+- One sentence. No friction-removal list, no "happy to come to your office / jump on a call / send a demo" menu — pick the single lowest-friction option implicitly (a chat).
 
-**Sign-off:**
-- Name
-- Degree + school (if relevant)
-- GitHub + LinkedIn
+**Sign-off (2 lines):**
+- Name + degree/school on one line
+- GitHub OR LinkedIn on one line (not both — pick the stronger for this contact)
 
-**Step 5.3 — LinkedIn DM version (shorter):**
+**Step 5.3 — LinkedIn DM version (even shorter):**
 
-If the channel is LinkedIn, compress to ~120 words (LinkedIn connection note limit):
+LinkedIn connection note limit is 300 chars (~50-60 words). Aim for **≤80 words** so it reads fast in notifications:
 - Drop the subject line
-- Keep the warm opener (1 line)
-- Keep 2-3 strongest mappings (not all 4)
-- Keep the honest caveat if critical (1 line)
-- Keep the 20-min ask
+- Warm opener: 1 line
+- 2 project mappings: 2 lines (same one-line-per-project rule)
+- Honest caveat: only if critical, 1 short line
+- 20-min ask: 1 line
+- Name only (no sign-off links — LinkedIn profile has them)
 - Drop the sign-off links (LinkedIn profile has them)
 
 **Step 5.4 — Why-this-works commentary:**
@@ -436,13 +468,15 @@ If no reply after the first message:
 ## Common Mistakes to Avoid
 
 1. **Generic flattery** — "I love your company's mission" is useless. Name a specific piece of their work.
-2. **Listing your resume** — the message is a mapping, not a recap. Pick 3-4 projects that map, skip the rest.
+2. **Listing your resume** — the message is a mapping, not a recap. Pick **2 projects** that map (per Non-Negotiable #10), skip the rest. Listing 3-4 projects signals you can't prioritize.
 3. **Asking for a job** — ask for a 20-min conversation. The job ask is implicit and comes across as higher-agency.
-4. **Long messages** — email body should be ~200 words, LinkedIn DM ~120 words. Every sentence must earn its place.
-5. **Hiding qualification gaps** — if they asked for a PhD and you have an MS, say so. They'll find out from your application anyway; getting ahead builds trust.
-6. **Skipping the research** — a message that could be sent to any company will be ignored. The 30 minutes of research is what makes it land.
-7. **Wrong contact** — don't email the CEO if the CTO posted the role. Don't message a peer if the founder is reachable. Rank contacts and pick #1.
-8. **No specific ask** — "let me know if you'd like to chat" is weak. "Would 20 min to compare what I built vs. what you're building be useful?" is strong.
+4. **Long messages** — email body MUST be ≤120 words, LinkedIn DM ≤80 words. Hard limits, not guidelines. A cold message that takes >30 seconds to read gets ignored. Every sentence must earn its place.
+5. **Multi-line project descriptions** — each of your 2 projects gets ONE bullet line: bold hyperlinked name + company concept + headline metric. If you need a second line to explain the project, it's not punchy enough — rewrite it or pick a different project.
+6. **Unlinked project names** — if a project has a public arXiv/GitHub/Medium link, the name MUST be a hyperlink (`**[ROMA](url)**`). An unlinked name when a link exists is a missed credibility signal — the reader can't verify your work in one click. Run Step 3.2.5 before drafting.
+6. **Hiding qualification gaps** — if they asked for a PhD and you have an MS, say so in one line. They'll find out from your application anyway; getting ahead builds trust.
+7. **Skipping the research** — a message that could be sent to any company will be ignored. The 30 minutes of research is what makes it land.
+8. **Wrong contact** — don't email the CEO if the CTO posted the role. Don't message a peer if the founder is reachable. Rank contacts and pick #1.
+9. **No specific ask** — "let me know if you'd like to chat" is weak. "Would 20 min to compare what I built vs. what you're building be useful?" is strong.
 
 ## File Structure
 
