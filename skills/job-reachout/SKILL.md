@@ -30,18 +30,19 @@ After a job application is submitted (or when the user shares a hiring LinkedIn 
 ## Non-Negotiables
 
 1. **NEVER draft a generic message** — every message must reference a specific, verifiable piece of the company's public work (a blog post, paper, product launch, LinkedIn post, or research area)
-2. **NEVER invent contact info** — only use emails/LinkedIn URLs found via search or confidently inferred from public patterns. Flag guessed emails as "try this, may bounce"
+2. **NEVER invent contact info** — only use emails/LinkedIn URLs found via search, published in the post, or **inferred via `infer_email.py` from Companies→Connections referral patterns**. Always flag inferred emails as "try this, may bounce". Never hand-wave `firstname@company.com` when referral emails exist to learn from.
 3. **Always classify the contact type BEFORE drafting** — Recruiter vs Hiring Manager vs Peer vs Founder/CTO vs Interviewer changes the message framework (see Phase 4.0). Wrong framework = ignored message.
 4. **Always identify the hiring manager / decision-maker** — even when the poster is a recruiter, find the CTO/team lead as a backup contact. Founders/CTOs at small startups are usually the hiring manager.
-5. **Always read the user's profile fresh** — never rely on cached/remembered project descriptions
-6. **Always map user's work → company's thesis with named projects on both sides** — "my EvoSkill maps to your Generative Simulators" beats "I have relevant experience"
-7. **Be honest about qualification gaps** — if the user doesn't meet a hard requirement (PhD, years of experience, citizenship, location), get ahead of it in the message rather than hiding it
-8. **One concrete ask** — always end with a specific, low-friction request. Ask type depends on contact: recruiter → "happy to share CV"; HM/founder → "20-min chat to compare what I built vs. what you're building"; peer → soft topic ask, NOT a job ask
-9. **Write findings back to Notion in batch mode** — unless the user explicitly opts out. Full reachout section goes under a `## Reachout` header. Chat shows the draft for copy-paste; Notion is the persistent record. If opted out, write a local markdown file (Phase 6.5).
-10. **NEVER overwrite an existing Reachout section** — if a page already has one, skip it (re-runs produce a new dated section, preserving history). Always check before writing.
-11. **SHORT MESSAGES ONLY — this is the #1 reason cold messages get ignored.** Hard limits: email body ≤120 words, LinkedIn DM ≤80 words, connection request note ≤300 characters. For HM/founder messages: pick exactly **2 projects** — each gets **one bullet line**: bold hyperlinked project name + the company concept it maps to + one headline metric. For recruiter messages: skip the 2-bullet mapping; use fit → proof → CTA instead (see Phase 5.2b). No sub-bullets, no expansion, no "happy to come to your office / jump on a call / send a demo" menu.
-12. **ALWAYS hyperlink the project name** — if the project has a public link (arXiv paper, GitHub repo, Medium write-up), the project name in the message MUST be a clickable hyperlink. Find the link in Step 3.2.5. Format in markdown: `**[ROMA](https://arxiv.org/...)**`. If no public link exists, leave the name bold-only (`**ROMA**`).
-13. **Writing hygiene (from high-response LinkedIn outreach)** — plain simple English; no flattery ("I love your company"); no desperation ("I would be honored"); no emojis; never share a phone number; conversational tone, not a cover letter; one ask only.
+5. **Always infer email for the primary reachout target** — after picking who to message (Phase 4.1), run `infer_email.py` (Phase 4.4) unless a verified email is already known (faculty page, published in post, or already in Connections). Put the top candidate + confidence in Recommended contacts.
+6. **Always read the user's profile fresh** — never rely on cached/remembered project descriptions
+7. **Always map user's work → company's thesis with named projects on both sides** — "my EvoSkill maps to your Generative Simulators" beats "I have relevant experience"
+8. **Be honest about qualification gaps** — if the user doesn't meet a hard requirement (PhD, years of experience, citizenship, location), get ahead of it in the message rather than hiding it
+9. **One concrete ask** — always end with a specific, low-friction request. Ask type depends on contact: recruiter → "happy to share CV"; HM/founder → "20-min chat to compare what I built vs. what you're building"; peer → soft topic ask, NOT a job ask
+10. **Write findings back to Notion in batch mode** — unless the user explicitly opts out. Full reachout section goes under a `## Reachout` header. Chat shows the draft for copy-paste; Notion is the persistent record. If opted out, write a local markdown file (Phase 6.5).
+11. **NEVER overwrite an existing Reachout section** — if a page already has one, skip it (re-runs produce a new dated section, preserving history). Always check before writing.
+12. **SHORT MESSAGES ONLY — this is the #1 reason cold messages get ignored.** Hard limits: email body ≤120 words, LinkedIn DM ≤80 words, connection request note ≤300 characters. For HM/founder messages: pick exactly **2 projects** — each gets **one bullet line**: bold hyperlinked project name + the company concept it maps to + one headline metric. For recruiter messages: skip the 2-bullet mapping; use fit → proof → CTA instead (see Phase 5.2b). No sub-bullets, no expansion, no "happy to come to your office / jump on a call / send a demo" menu.
+13. **ALWAYS hyperlink the project name** — if the project has a public link (arXiv paper, GitHub repo, Medium write-up), the project name in the message MUST be a clickable hyperlink. Find the link in Step 3.2.5. Format in markdown: `**[ROMA](https://arxiv.org/...)**`. If no public link exists, leave the name bold-only (`**ROMA**`).
+14. **Writing hygiene (from high-response LinkedIn outreach)** — plain simple English; no flattery ("I love your company"); no desperation ("I would be honored"); no emojis; never share a phone number; conversational tone, not a cover letter; one ask only.
 
 ## The Process
 
@@ -313,9 +314,10 @@ Compare the user's profile to the JD's hard requirements. Common gaps:
 Preferred order:
 1. **Faculty email** (if they're a professor) — `cs.umd.edu/~sfeizi/` lists `sfeizi@cs.umd.edu`. Professors always read their faculty email.
 2. **Email they published in the post** (recruiters often do this) — use it; they invited that channel
-3. **LinkedIn DM** — if they explicitly said "DM me" in a post, this is the channel they invited
-4. **Guessed email** — `firstname@company.com` is the most common founder pattern. Flag as "try this, may bounce"
-5. **LinkedIn connection request** — for peers and when no email is found (note ≤300 chars)
+3. **Email already in Connections** for that person — if they're linked on the company's Referral relation and have an Email field, use it (verified)
+4. **Inferred email via `infer_email.py`** (Phase 4.4) — required for the primary target when 1–3 are missing
+5. **LinkedIn DM** — if they explicitly said "DM me" in a post, this is a strong channel even when email is also inferred (send both if useful)
+6. **LinkedIn connection request** — for peers and when no email can be inferred (note ≤300 chars)
 
 **Step 4.3 — Check for warm-intro angles:**
 
@@ -326,6 +328,44 @@ Look for any shared connection that makes the cold message warmer:
 - Same hometown/region (use sparingly, only if genuinely useful)
 
 These go in the **first line** of the message — they're the opener that gets it read.
+
+**Step 4.4 — Infer email for the primary reachout target (REQUIRED):**
+
+Once Phase 4.1 has named the person to message, resolve their email before drafting.
+
+**Skip inference only if** you already have a verified address from Step 4.2 items 1–3.
+
+**Otherwise run:**
+
+```bash
+python3 skills/job-reachout/scripts/infer_email.py \
+  --company "{Company Name}" \
+  --name "{First Last}" \
+  --json
+```
+
+Optional: `--domain company.com` when the company has no work emails on Referral (only gmail / empty) but you know the corporate domain from their website.
+
+**How to use the output:**
+1. Read `learned.domain` + `learned.pattern` + `learned.pattern_confidence`
+2. Take `inferred[0]` as the **primary email** if confidence is `high` or `medium`
+3. If top confidence is `low` only, still list it but prefer LinkedIn DM as the send channel and mark email as backup
+4. List `inferred[1]` (and optionally `[2]`) as fallbacks in Recommended contacts
+5. Always label inferred addresses: **"try this, may bounce"**
+6. If `inferred` is empty (no domain), say so explicitly and fall back to LinkedIn — do **not** invent `@company.com` by hand unless you pass `--domain` from a real careers/about page
+
+**Also check warm referrals at the same time:** if the company has Referral connections, note the top 1–2 people (name + relation) under Recommended contacts as alternate warm paths — even when you're emailing the HM/CTO cold.
+
+Example Recommended contacts block after inference:
+
+```markdown
+### Recommended contacts
+1. **Ben Willox** — Co-Founder & CTO — email: `ben@exacare.com` (inferred, medium, pattern=`first` from referrals) — try this, may bounce
+   - Fallbacks: `ben.willox@exacare.com`, `bwillox@exacare.com`
+   - LinkedIn: https://www.linkedin.com/in/benjamin-willox
+2. **Nikki Padda** — Talent — LinkedIn DM (posted the role)
+3. **Warm referrals on file:** [Name] (BITS) — phone/email from Connections
+```
 
 ### Phase 5: Draft the Message
 
@@ -346,7 +386,7 @@ Rules:
 - Avoid generic subjects like "Following up on my application" or "Excited about [company]"
 - Skip subject entirely for LinkedIn DMs / connection notes
 
-**Step 5.2 — Message body by contact type (STAY SHORT — see Non-Negotiable #11):**
+**Step 5.2 — Message body by contact type (STAY SHORT — see Non-Negotiable #12):**
 
 Hard limits always apply: email ≤120 words, LinkedIn DM ≤80 words, connection note ≤300 chars.
 
@@ -421,6 +461,7 @@ After drafting, include a short "Why this works" section explaining the choices 
 - Why the mapping or proof works (named projects, quantified, or screening answers)
 - Why the caveat works (gets ahead of gaps) — if present
 - Why the ask works (low friction, type-appropriate)
+- Why this email / channel (inferred pattern + confidence, or verified source; LinkedIn backup)
 - Backup contacts if primary goes quiet
 
 **Step 5.5 — What NOT to write (anti-patterns):**
@@ -462,11 +503,22 @@ Write the reachout findings to a temp file in this exact format (this is the bod
 - [Honest caveat, or "None — profile matches JD requirements"]
 
 ### Recommended contacts
-1. **[Name]** — [Role] — [channel: email address or LinkedIn URL]
+1. **[Name]** — [Role] — [channel]
+   - Email: `[inferred or verified]` ([confidence], pattern=`…` from referrals) — try this, may bounce
+   - Fallbacks: `…`, `…`
+   - LinkedIn: [url]
 2. **[Name]** — [Role] — [channel]
-3. **[Name]** — [Role] — [channel]
+3. **Warm referrals on file:** [Name] ([relation]) — from Companies→Connections
+
+### Inferred email
+- **Target:** [Name]
+- **Primary:** `email@company.com` ([high|medium|low], pattern=`first` / `first.last` / …)
+- **Fallbacks:** `…`
+- **Evidence:** learned from N referral work emails on domain `company.com`
+- **Note:** try this, may bounce — skip this block only if email was verified (faculty / post / Connections)
 
 ### Draft message
+**To:** `[primary email]` (or LinkedIn DM if inference empty / low-only)
 **Subject:** [subject line]
 
 [full message body — the same draft shown in chat, so the user can copy-paste from Notion too]
@@ -541,9 +593,16 @@ The Company column links to the section below (anchor: `#1-company--role`, lower
 ### Recommended contacts
 1. ...
 
-### Draft — LinkedIn DM to [Name]
+### Inferred email
+- **Target:** [Name]
+- **Primary:** `email@company.com` ([confidence], pattern=`…`) — try this, may bounce
+- **Fallbacks:** …
+
+### Draft — Email to [Name] / LinkedIn DM
 
 > [full message]
+
+**Send via:** email to `…` (inferred) and/or LinkedIn DM
 
 ### Why this works
 - ...
@@ -565,9 +624,10 @@ Present in chat AND write to Notion (if page_id known and not opted out) OR loca
 1. **Contact type** — Recruiter / HM / Founder / Peer / Interviewer (drives framework)
 2. **Team analysis** — who posted the role, hiring manager, team size/stage, peers
 3. **Why this is a good fit** — mapping table (company thesis → user's work), honest gaps
-4. **Recommended contacts** — ranked table with channel + backups
-5. **Draft message** — subject (if email) + body + send instructions
-6. **Why this works** — 3-4 strategic bullets
+4. **Recommended contacts** — ranked table with channel + backups + warm referrals on file
+5. **Inferred email** — primary + fallbacks from `infer_email.py` (or verified source)
+6. **Draft message** — subject (if email) + body + **send via** (email and/or LinkedIn)
+7. **Why this works** — 3-4 strategic bullets
 
 ### LinkedIn-post mode
 
@@ -581,7 +641,7 @@ For each job, show in chat a **compact summary** (not the full draft — that go
 [1/17] Patronus AI — MTS Research Scientist
   Contact type: Founder/CTO
   Hiring manager: Rebecca Qian (CTO, posted the role)
-  Top contact: rebecca@patronus.ai / linkedin.com/in/rebeccaqian
+  Top contact: rebecca@patronus.ai (inferred, high, pattern=first) / linkedin.com/in/rebeccaqian
   Fit: EvoData→Generative Simulators, TraceDB→replayable learning envs, LLM-as-Judge→Glider
   ✓ Reachout written to Notion
 ```
@@ -658,8 +718,9 @@ If no reply after the first message:
 8. **Hiding qualification gaps** — if they asked for a PhD / 10+ YOE / a city you're not in, say so in one line. They'll find out anyway; getting ahead builds trust.
 9. **Skipping the research** — a message that could be sent to any company will be ignored. The research is what makes it land. For LinkedIn posts, reference the actual post content.
 10. **Wrong contact** — don't email the CEO if the CTO posted the role. Don't stop at the recruiter if the founder is reachable as backup. Rank contacts and pick #1 + backups.
-11. **No specific ask** — "let me know if you'd like to chat" is weak. Type-appropriate asks only (Phase 4.0 / 5.2).
-12. **Flattery, desperation, emojis, phone numbers** — kill response rate. Keep plain, specific, human.
+11. **Skipping email inference** — once you know who to message, run `infer_email.py` (Phase 4.4). Don't guess `@company.com` by hand when referrals can teach the pattern, and don't omit the Inferred email section.
+12. **No specific ask** — "let me know if you'd like to chat" is weak. Type-appropriate asks only (Phase 4.0 / 5.2).
+13. **Flattery, desperation, emojis, phone numbers** — kill response rate. Keep plain, specific, human.
 
 ## File Structure
 
@@ -667,8 +728,38 @@ If no reply after the first message:
 skills/job-reachout/
 ├── SKILL.md                        # This file
 └── scripts/
-    └── reachout_writer.py          # Notion I/O: query candidates, check existing, append section
+    ├── reachout_writer.py          # Notion I/O: query candidates, check existing, append section
+    └── infer_email.py              # Infer target emails from Companies→Connections referral patterns
 ```
+
+### `infer_email.py` — guess emails from referral patterns
+
+**Required in Phase 4.4** for every primary reachout target without a verified email.
+
+When you know who to message (e.g. a CTO found via LinkedIn) but not their email, learn the company's format from Connections already linked on that company's **Referral** relation:
+
+```bash
+# Show learned domain + pattern from referrals
+python3 skills/job-reachout/scripts/infer_email.py --company "Google"
+
+# Infer candidates for the reachout target (always use --json in agent runs)
+python3 skills/job-reachout/scripts/infer_email.py --company "Prior Labs" --name "Jane Doe" --json
+python3 skills/job-reachout/scripts/infer_email.py --company "Kipo AI" --name "Alex Kim" --domain kipo.ai --json
+```
+
+Behavior:
+- Loads Companies DB → `Referral` relation → Connections with emails
+- Ignores personal domains (gmail, etc.) and off-domain work emails that don't match the company name
+- Votes on local-part pattern (`first`, `first.last`, `flast`, `firstlast`, …)
+- Emits ranked candidates flagged **"try this, may bounce"**
+- Use `--domain` when referrals only have personal emails or the company row is missing work domains
+
+**Agent rules:**
+1. Run this after Phase 4.1 names the person — before Phase 5 draft
+2. Prefer `inferred[0]` when confidence is high/medium; if only low, lead with LinkedIn DM and list email as backup
+3. Put primary + fallbacks + evidence in the **Inferred email** output section
+4. Never skip silently when the company exists in Companies DB — if inference returns empty, say "no referral work emails / no domain" and use LinkedIn
+5. Also surface warm Referral connections as alternate contacts when present
 
 The skill also uses the shared Notion scripts at `scripts/notion/`:
 - `notion_client.py` — HTTP primitives (used by reachout_writer.py)
