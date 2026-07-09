@@ -335,7 +335,7 @@ Each candidate should be: `{"company": "...", "role": "...", "url": "...", "sour
 
 **Note:** Web search candidates will not have a `location` field — that's expected. The `dedup_liveness_upload.py` pipeline automatically enriches missing locations from ATS APIs (Greenhouse/Ashby/Lever) during Step 3. No need to add location manually.
 
-**Use a Codex subagent** to run broad discovery queries in parallel when the current surface supports subagents. After the subagent completes, parse its returned JSON and append to `candidate_store.json` yourself. If subagents are unavailable, run the queries sequentially in the main thread.
+**Use a subagent** to run broad discovery queries in parallel when the current surface supports subagents. After the subagent completes, parse its returned JSON and append to `candidate_store.json` yourself. If subagents are unavailable, run the queries sequentially in the main thread.
 
 **IMPORTANT — Subagent File Write Pattern:**
 Subagents should not write `candidate_store.json` directly. Always instruct subagents to:
