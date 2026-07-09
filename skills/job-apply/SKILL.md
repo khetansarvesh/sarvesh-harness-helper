@@ -39,6 +39,7 @@ Automate job application filling using Chrome DevTools MCP tools. Uses the Simpl
      - Paragraph 4: Forward-looking close
      - Use JD keywords naturally throughout
      - Save as text in the textarea, or generate PDF if file upload required
+7. **ALWAYS cite project links in open-ended answers** — whenever an answer names a project that has a public URL (arXiv, GitHub, Medium, company blog), append that URL in parentheses right after the project name. ATS textareas are plain text — use `ROMA (https://arxiv.org/abs/2602.01848)`, never markdown `[ROMA](url)`. If no public link exists, name the project without empty `()`.
 
 ## Workflow
 
@@ -184,6 +185,42 @@ For open-ended questions, follow these strict rules:
 - **No generic statements** — every answer must reference a specific project, tool, or metric from the profile
 - **Read the question carefully** — answer exactly what's asked, nothing more
 - Fetch detailed project context from Notion (`python3 scripts/notion/page_reader.py {project}`) when composing answers
+- **Cite the project link in parentheses** — see "Project link citations" below. This is mandatory whenever a public URL exists.
+
+#### Project link citations (REQUIRED for open-ended answers)
+
+ATS forms are plain text. When you mention a project, put its public URL in parentheses immediately after the name:
+
+**Format:** `ProjectName (https://...)`
+
+**Good:**
+> At Sentient I built ROMA (https://arxiv.org/abs/2602.01848), a recursive deep search agent that beat SOTA by 10% on SEAL-0...
+
+**Also good (blog / GitHub):**
+> I designed SERA (https://www.sentient.xyz/blog/how-to-build-a-faster-and-smarter-agent-by-pre-filtering-tools-with-rag) to cut tool-routing latency 50% across a 40+ tool action space...
+
+**Bad (missing link):**
+> At Sentient I built ROMA, a recursive deep search agent...
+
+**Bad (markdown — ATS won't render it):**
+> At Sentient I built [ROMA](https://arxiv.org/abs/2602.01848)...
+
+**How to resolve the URL (in order):**
+1. Scan the Notion project page for explicit link lines (`BLOG :`, `Github :`, `Gihub :`, arXiv/alphaXiv URLs, Medium URLs)
+2. Else use the **Known link inventory** below
+3. If still none → write the project name only (no empty parentheses)
+
+**Known link inventory** (verify / refresh from Notion when composing; links may change):
+
+| Project | Link | Type |
+|---|---|---|
+| ROMA | https://arxiv.org/abs/2602.01848 | arXiv paper |
+| EvoSkill / TraceDB | https://arxiv.org/abs/2603.02766 | arXiv (also https://www.alphaxiv.org/abs/2603.02766, https://github.com/sentient-agi/EvoSkill) |
+| SERA | https://www.sentient.xyz/blog/how-to-build-a-faster-and-smarter-agent-by-pre-filtering-tools-with-rag | Sentient blog (also https://github.com/khetansarvesh/SERA) |
+| Deep Research (Strategy) | https://khetansarvesh.medium.com/search-deep-research-agents-a7b6f3ae6d32 | Medium |
+| Google Scholar (fallback for pubs) | https://scholar.google.com/citations?user=MSW5-VMAAAAJ | fallback |
+
+Prefer the single best link per mention (paper > blog > GitHub). If the answer names two projects, cite each once with its own `(url)`.
 
 **File Uploads (resume PDF, cover letter)**
 ```
