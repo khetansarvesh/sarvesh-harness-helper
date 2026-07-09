@@ -7,6 +7,12 @@ description: Discover new job postings from ATS platforms — scans Greenhouse, 
 
 Discover new job postings by scanning ATS platforms (Greenhouse, Ashby, Lever) directly via their public APIs. Filters by title keywords, deduplicates against Notion, and adds new offers to Notion with status "Scanned" for evaluation.
 
+## Codex Compatibility
+
+- "WebSearch" in older notes means Codex's web search capability.
+- "Background agent" means a Codex subagent. If subagents are unavailable on your current surface, run the same collection steps sequentially in the main thread.
+- Browser steps are written as actions, not tool IDs. Use the browser surface available in your Codex environment: browser MCP, in-app browser, Chrome extension, or computer use.
+
 ## When to Activate
 
 - User asks to scan for new jobs or openings
@@ -67,7 +73,7 @@ Use WebSearch with `site:` filters to discover companies NOT yet in `tracked_com
 - `site:jobs.ashbyhq.com "AI Engineer" OR "ML Engineer"`
 - `site:job-boards.greenhouse.io "Research Scientist" OR "Applied AI"`
 
-**CRITICAL:** WebSearch results may be stale (Google caches for weeks). Before adding to Notion, verify liveness with Playwright or `check-liveness.mjs`.
+**CRITICAL:** web search results may be stale (search indexes can lag for weeks). Before adding to Notion, verify liveness with Playwright or `check-liveness.mjs`.
 
 ### Priority Order
 
@@ -139,7 +145,7 @@ node skills/job-scan/scripts/liveness_helpers/check-liveness.mjs --file urls.txt
 
 ### Default scan (API + WebSearch + liveness):
 
-This is the standard pipeline that runs every time `/job-scan` is invoked. ALL steps are mandatory — do NOT skip WebSearch or liveness.
+This is the standard pipeline that runs every time `/job-scan` is invoked. ALL steps are mandatory — do NOT skip web search or liveness.
 
 **Important:** Title filtering is centralized in `dedup_liveness_upload.py`, NOT in the collection steps. All sources just dump raw candidates into `candidate_store.json`. Filtering happens once at the end.
 
@@ -170,13 +176,13 @@ site:openai.com/careers "Research Engineer" OR "Applied AI" OR "Machine Learning
 For each skipped company:
 
 1. Build a WebSearch query using `site:{careers_url}` + positive keywords from Notion Preferences
-2. Run WebSearch with the query
+2. Run the query with WebSearch **with the same `startPublishedDate` time filter as Step 2** (based on the scan interval — 4h/24h/168h)
 3. For each result, check if the URL is a **specific job posting** or a **landing/category page**:
    - **Specific job URL** (has UUID, numeric job ID like `/jobs/12345`, or known ATS pattern) → add directly to candidate store
    - **Landing/category page** (URL ends in `/careers`, `/search?`, `/job-category/`, or has no job-specific identifier) → **run the Adaptive Career Page Crawl protocol below**
-4. **Return all results as JSON** — do NOT write to `candidate_store.json` directly. Background agents lack file write permissions. Instead, return the array of candidates in the agent's result, and the main orchestrator (you) will append them to `candidate_store.json` after the agent completes.
+4. **Return all results as JSON** — do NOT write to `candidate_store.json` directly from a subagent. Instead, return the array of candidates in the subagent result, and the main thread will append them to `candidate_store.json` after the subagent completes.
 
-**Process skipped companies sequentially** (one browser tab at a time). Chrome DevTools MCP cannot run multiple tabs in parallel for crawling.
+**Process skipped companies sequentially** (one browser tab or browser session at a time). Do not parallelize browser crawling.
 
 #### Adaptive Career Page Crawl Protocol
 
@@ -184,9 +190,9 @@ When a URL is a landing/category page, follow this protocol to extract individua
 
 **Step A — Open & Orient:**
 
-1. Call `mcp__chrome-devtools__new_page` with the landing page URL
+1. Open the landing page URL in the available browser tool
 2. Wait 3 seconds for JS/SPA rendering
-3. Call `mcp__chrome-devtools__take_snapshot` to get the accessibility tree
+3. Capture a page snapshot or equivalent structured DOM/accessibility view
 4. Classify the page into one of three types:
    - **Type A (Filter-capable):** Page has visible search/filter controls — look for `searchbox`, `combobox`, `textbox` with labels like "search", "keyword", "location", "country", "team", "category"
    - **Type B (Plain listing):** Page shows job listings directly with no filter UI — just links to individual jobs
@@ -213,7 +219,7 @@ When a URL is a landing/category page, follow this protocol to extract individua
 
 **Step C — Extract Job Links (Type A filtered + Type B):**
 
-Run this JavaScript via `mcp__chrome-devtools__evaluate_script`:
+Run this JavaScript through the browser tool's page-evaluation capability:
 
 ```javascript
 (() => {
@@ -261,7 +267,7 @@ Career page crawl: X companies attempted, Y succeeded (Z total jobs), W failed
 
 ```
 Company: TechCorp (skipped, careers_url: https://careers.techcorp.com/engineering)
-1. WebSearch: site:careers.techcorp.com "ML Engineer" OR "Research Scientist"
+1. WebSearch: `site:careers.techcorp.com "ML Engineer" OR "Research Scientist"`
    → Returns https://careers.techcorp.com/engineering?team=ml (landing page)
 2. Open page → take_snapshot
    → Finds: searchbox (uid: s42), location dropdown (uid: s78), 150 job listings
@@ -282,13 +288,13 @@ Company: TechCorp (skipped, careers_url: https://careers.techcorp.com/engineerin
 
 Jobright.ai is a job aggregator with AI-powered matching. If the user has a Jobright tab open with filters applied, scrape it for additional job discoveries.
 
-1. Call `mcp__chrome-devtools__list_pages` and look for a page URL containing `jobright.ai`
+1. Inspect open browser pages and look for a page URL containing `jobright.ai`
    - If **not found** → print `"Jobright: No tab found, skipping"` and move to Step 2
-   - If **found** → call `mcp__chrome-devtools__select_page` to switch to it
+   - If **found** → switch to that page in the active browser tool
 
-2. **Auto-refresh** the page to get the latest listings. Call `mcp__chrome-devtools__navigate_page` with the current Jobright URL (e.g., `https://jobright.ai/jobs/recommend`). Then call `mcp__chrome-devtools__wait_for` with text `["Recommended", "APPLY"]` and timeout 10000ms to ensure the page has fully loaded.
+2. **Auto-refresh** the page to get the latest listings. Reload the current Jobright URL (for example `https://jobright.ai/jobs/recommend`), then wait for text such as `Recommended` or `APPLY` to ensure the page has fully loaded.
 
-   All extraction functions are in `skills/job-scan/scripts/jobright_helpers/extract-jobright.mjs`. Read the file and inject functions via `evaluate_script`.
+   All extraction functions are in `skills/job-scan/scripts/jobright_helpers/extract-jobright.mjs`. Read the file and inject functions through the browser tool's script-evaluation feature.
 
 3. **Scroll to load all jobs.** Call `evaluate_script` with the `scrollAndCount()` function from `extract-jobright.mjs`. Returns the total number of job cards loaded.
 
@@ -317,24 +323,27 @@ python3 scripts/notion/page_preferences.py --search-queries --pretty
 
 For each query:
 
-1. Run WebSearch with the query string
+1. Run WebSearch with the query string **AND a `startPublishedDate` time filter** = 24 hours ago (ISO 8601) : 
+   - **NEVER run web searches without `startPublishedDate`** — without it, Exa returns stale results that waste liveness checks and flood the pipeline with expired jobs.
 2. Parse each result — extract title, company, and URL:
    - Title: text before " @ " or " | " or " — " in the result title
    - Company: text after " @ " or " | " or " — "
    - URL: the result link
-3. **Return all results as JSON** — do NOT write to `candidate_store.json` directly. Background agents lack file write permissions. Instead, return the array of candidates in the agent's result, and the main orchestrator (you) will append them to `candidate_store.json` after the agent completes.
+3. **Return all results as JSON** — do NOT write to `candidate_store.json` directly from a subagent. Instead, return the array of candidates in the subagent result, and the main thread will append them to `candidate_store.json` after the subagent completes.
 
 Each candidate should be: `{"company": "...", "role": "...", "url": "...", "source": "web_search"}`
 
-**Use a background agent** to run all broad discovery queries in parallel for speed. After the agent completes, parse its returned JSON and append to `candidate_store.json` yourself.
+**Note:** Web search candidates will not have a `location` field — that's expected. The `dedup_liveness_upload.py` pipeline automatically enriches missing locations from ATS APIs (Greenhouse/Ashby/Lever) during Step 3. No need to add location manually.
 
-**IMPORTANT — Background Agent File Write Pattern:**
-Background agents cannot write files (permissions are denied automatically). Always instruct background agents to:
+**Use a Codex subagent** to run broad discovery queries in parallel when the current surface supports subagents. After the subagent completes, parse its returned JSON and append to `candidate_store.json` yourself. If subagents are unavailable, run the queries sequentially in the main thread.
+
+**IMPORTANT — Subagent File Write Pattern:**
+Subagents should not write `candidate_store.json` directly. Always instruct subagents to:
 1. Collect results in memory
 2. Return the full JSON array in their completion message
 3. The main orchestrator then reads the agent's result and writes to `candidate_store.json`
 
-Never instruct a background agent to write/edit/append to `candidate_store.json` directly.
+Never instruct a subagent to write/edit/append to `candidate_store.json` directly.
 
 **Step 2.5 (MANDATORY):** Add user-input jobs from Notion Preferences:
 
@@ -350,17 +359,20 @@ For each URL listed, append to `skills/job-scan/candidate_store.json` with:
 
 This allows you to paste job URLs directly into the Notion Preferences page under "User Input Jobs" and have them flow through the same pipeline.
 
-**Step 3 (MANDATORY):** Title filter, dedup, liveness check, and upload:
+**Step 3 (MANDATORY):** Title filter, location enrichment, dedup, liveness check, and upload:
 
 ```bash
 python3 skills/job-scan/scripts/dedup_liveness_upload.py skills/job-scan/candidate_store.json
 ```
 
-This script runs four steps in sequence:
+This script runs six steps in sequence:
 1. **Title filter** — loads positive/negative keywords from Notion Preferences, filters candidates by role title. Short keywords (AI, ML, NLP) use word-boundary matching to avoid false positives.
-2. **Dedup** — queries Notion once, filters duplicates (URL + company::role, both vs Notion and intra-batch)
-3. **Liveness check** — runs Playwright on each deduped URL to verify it's still active. Expired links are filtered out before upload.
-4. **Upload** — writes surviving jobs to Notion with status "Scanned"
+2. **Location enrichment** — for candidates with no location (e.g., from web search), batch-fetches Greenhouse/Ashby/Lever APIs by company slug to resolve the job's location. This allows non-US jobs to be filtered out even when they come from web search.
+3. **Location filter** — removes non-US jobs using `is_us_location()`. Jobs with known US/Remote locations pass; known non-US (India, Germany, London, etc.) are filtered out; unknown locations pass through.
+4. **URL filter** — removes landing/category pages that aren't specific job postings.
+5. **Dedup** — queries Notion once, filters duplicates (URL + company::role, both vs Notion and intra-batch)
+6. **Liveness check** — runs Playwright on each deduped URL to verify it's still active. Expired links are filtered out before upload.
+7. **Upload** — writes surviving jobs to Notion with status "Scanned", including the `Location` field.
 
 **NEVER use `--skip-liveness`** — dead URLs will get uploaded to Notion.
 
@@ -388,8 +400,9 @@ node skills/job-scan/scripts/liveness_helpers/check-liveness.mjs https://job-boa
 
 Each new offer is added as a row in the Notion applications database with:
 
-- `Company_Name`, `Role`, `URL`, `Date` populated
+- `Company_Name`, `Role`, `URL`, `Date`, `Location` populated
 - `Status` = "Scanned"
+- `Source` = API / Web Search / Broad Web Search / Fallback Web Search / User / Jobright (normalized from candidate source field)
 - No score (added later by job-eval/job-eval)
 
 ### Console summary:
@@ -408,9 +421,13 @@ Jobright: 8 jobs processed, 7 resolved to ATS URLs, 1 fallback  ← resolve_jobr
 Loaded 122 candidates from candidate_store.json   ← dedup_liveness_upload.py output
   Title filter: 27 positive, 31 negative keywords
   After title filter: 107 pass, 15 filtered out
-  After dedup: 97 new, 10 duplicates
-  Liveness: 48 expired, 49 active/uncertain pass through
-  Uploaded 49 jobs to Notion (status: Scanned)
+  Location enrichment: 20 candidates need location lookup
+    Greenhouse: 8 enriched, Ashby: 10 enriched, Lever: 2 enriched
+  After location filter: 97 pass, 10 non-US filtered out
+  After URL filter: 93 pass, 4 landing pages filtered out
+  After dedup: 82 new, 11 duplicates
+  Liveness: 41 expired, 41 active/uncertain pass through
+  Uploaded 41 jobs to Notion (status: Scanned)
 
 → Run job-eval on new offers to score them.
 ```
@@ -425,7 +442,9 @@ skills/job-scan/
 └── scripts/
     ├── scout_specials.py           # Portal scanner orchestrator
     ├── resolve_jobright.py         # Jobright data normalizer + candidate store writer
-    ├── dedup_liveness_upload.py         # Title filter → dedup → liveness → upload to Notion
+    ├── enrich_location.py             # Enrich missing locations from ATS APIs (called by dedup_liveness_upload)
+    ├── dedup_liveness_upload.py         # Title filter → location enrichment → dedup → liveness → upload to Notion
+    ├── backfill_location.py             # One-time backfill of Location column for existing Scanned jobs
     ├── jobright_helpers/
     │   └── extract-jobright.mjs    # Browser-side JS functions for Jobright extraction
     ├── api_helpers/
