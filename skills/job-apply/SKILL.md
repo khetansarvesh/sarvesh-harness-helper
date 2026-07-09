@@ -329,4 +329,4 @@ Tabs open:
 - **job-interview-prep** — Prepare for interviews at a specific company
 - **job-cv-tailor** — Generate an ATS-optimized CV tailored to the JD
 - **job-ops** — Command center that routes to all career skills
-- **linkedin-outreach** — Draft personalized LinkedIn outreach messages
+- **job-reachout** — Research team + draft personalized cold email / LinkedIn DM (use this for hiring outreach; supersedes linkedin-outreach)

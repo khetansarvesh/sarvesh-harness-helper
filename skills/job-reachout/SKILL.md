@@ -1,11 +1,11 @@
 ---
 name: job-reachout
-description: Research the team behind a job posting, identify the hiring manager and best contact, and draft a personalized cold email / LinkedIn DM that maps the user's work to the company's public thesis. Use when the user has already applied (or is about to) and wants a warm signal-boost to a decision-maker.
+description: Research the team behind a job posting or LinkedIn hiring post, classify the contact type (recruiter / hiring manager / peer / founder), and draft a personalized cold email or LinkedIn DM that maps the user's work to the company's public thesis. Use when the user has already applied (or is about to), shares LinkedIn post URLs to reach out on, or wants a warm signal-boost to a decision-maker.
 ---
 
 # Job Reachout — Team Research + Personalized Cold Message
 
-After a job application is submitted, a well-researched cold message to the right person raises response rates dramatically. This skill researches the team behind a specific job posting, identifies the single best contact (hiring manager, founder, or peer), and drafts a personalized email or LinkedIn DM that maps the user's actual work to the company's publicly stated thesis.
+After a job application is submitted (or when the user shares a hiring LinkedIn post), a well-researched cold message to the right person raises response rates dramatically. This skill researches the team behind a specific job posting or LinkedIn post, classifies who you're messaging, identifies the best contact, and drafts a personalized email or LinkedIn DM that maps the user's actual work to the company's publicly stated thesis.
 
 ## When to Activate
 
@@ -14,35 +14,40 @@ After a job application is submitted, a well-researched cold message to the righ
 - User says "reach out to [company] people" after applying
 - User wants a warm intro / signal-boost on top of a submitted application
 - User shares a job URL and asks "who do I contact?"
+- User shares one or more **LinkedIn post URLs** and wants outreach drafts (hiring posts, recruiter posts, founder "we're hiring" posts)
 - User says "run reachout for all my evaluated jobs" or "draft reachouts for everything in Almost Applied" → **batch mode** (Phase 0 queries Notion, loops Phase 1–6 per job, writes each to Notion)
 
 ## Prerequisites
 
-- **The job posting URL or company + role name** — required to identify the team (single-job mode). In batch mode, URLs come from Notion.
+- **One of:** job posting URL, company + role name, or LinkedIn post URL(s) — required to identify the team (single-job / LinkedIn-post mode). In batch mode, URLs come from Notion.
 - **User's profile data** loaded fresh:
   - `Notion (fetch via `python3 scripts/notion/page_reader.py resume`)` — experience, education, skills, projects
   - `Notion (fetch via `python3 scripts/notion/page_reader.py projects`)` — detailed project descriptions for matching
 - Optional but high-value: the user has already applied (so the message is a signal-boost, not a substitute)
-- `NOTION_TOKEN` environment variable set — for fetching profile data AND for the Notion read/write in batch mode
+- `NOTION_TOKEN` environment variable set — for fetching profile data; also required for Notion write in batch mode
+- **Notion write is optional** — if the user says "don't upload to Notion" / "just create a file", skip Phase 6 and write a local markdown file instead (see Phase 6.5)
 
 ## Non-Negotiables
 
 1. **NEVER draft a generic message** — every message must reference a specific, verifiable piece of the company's public work (a blog post, paper, product launch, LinkedIn post, or research area)
 2. **NEVER invent contact info** — only use emails/LinkedIn URLs found via search or confidently inferred from public patterns. Flag guessed emails as "try this, may bounce"
-3. **Always identify the hiring manager FIRST** — the goal is the decision-maker, not a random employee. Founders/CTOs at small startups are usually the hiring manager
-4. **Always read the user's profile fresh** — never rely on cached/remembered project descriptions
-5. **Always map user's work → company's thesis with named projects on both sides** — "my EvoSkill maps to your Generative Simulators" beats "I have relevant experience"
-6. **Be honest about qualification gaps** — if the user doesn't meet a hard requirement (PhD, years of experience, citizenship), get ahead of it in the message rather than hiding it
-7. **One concrete ask** — always end with a specific, low-friction request (usually "20-min chat to compare what I built vs. what you're building")
-8. **ALWAYS write findings back to Notion** in batch mode — the full reachout section (team, mapping, contacts, draft, why-it-works) goes under a `## Reachout` header on the job's Notion page. The chat shows the draft for copy-paste; Notion is the persistent record.
-9. **NEVER overwrite an existing Reachout section** — if a page already has one, skip it (re-runs produce a new dated section, preserving history). Always check before writing.
-10. **SHORT MESSAGES ONLY — this is the #1 reason cold messages get ignored.** Hard limits: email body ≤120 words, LinkedIn DM ≤80 words. Pick exactly **2 projects** from the user's profile — not 3, not 4. Each project gets **one bullet line**: bold hyperlinked project name + the company concept it maps to + one headline metric. No sub-bullets, no expansion, no "happy to come to your office / jump on a call / send a demo" menu. If a line doesn't fit in one sentence with a number, the project is the wrong pick.
-11. **ALWAYS hyperlink the project name** — if the project has a public link (arXiv paper, GitHub repo, Medium write-up), the project name in the message MUST be a clickable hyperlink. Find the link in Step 3.2.5. Format in markdown: `**[ROMA](https://arxiv.org/...)**` — the shared Notion parser renders this as bold + linked. If no public link exists, leave the name bold-only (`**ROMA**`).
+3. **Always classify the contact type BEFORE drafting** — Recruiter vs Hiring Manager vs Peer vs Founder/CTO vs Interviewer changes the message framework (see Phase 4.0). Wrong framework = ignored message.
+4. **Always identify the hiring manager / decision-maker** — even when the poster is a recruiter, find the CTO/team lead as a backup contact. Founders/CTOs at small startups are usually the hiring manager.
+5. **Always read the user's profile fresh** — never rely on cached/remembered project descriptions
+6. **Always map user's work → company's thesis with named projects on both sides** — "my EvoSkill maps to your Generative Simulators" beats "I have relevant experience"
+7. **Be honest about qualification gaps** — if the user doesn't meet a hard requirement (PhD, years of experience, citizenship, location), get ahead of it in the message rather than hiding it
+8. **One concrete ask** — always end with a specific, low-friction request. Ask type depends on contact: recruiter → "happy to share CV"; HM/founder → "20-min chat to compare what I built vs. what you're building"; peer → soft topic ask, NOT a job ask
+9. **Write findings back to Notion in batch mode** — unless the user explicitly opts out. Full reachout section goes under a `## Reachout` header. Chat shows the draft for copy-paste; Notion is the persistent record. If opted out, write a local markdown file (Phase 6.5).
+10. **NEVER overwrite an existing Reachout section** — if a page already has one, skip it (re-runs produce a new dated section, preserving history). Always check before writing.
+11. **SHORT MESSAGES ONLY — this is the #1 reason cold messages get ignored.** Hard limits: email body ≤120 words, LinkedIn DM ≤80 words, connection request note ≤300 characters. For HM/founder messages: pick exactly **2 projects** — each gets **one bullet line**: bold hyperlinked project name + the company concept it maps to + one headline metric. For recruiter messages: skip the 2-bullet mapping; use fit → proof → CTA instead (see Phase 5.2b). No sub-bullets, no expansion, no "happy to come to your office / jump on a call / send a demo" menu.
+12. **ALWAYS hyperlink the project name** — if the project has a public link (arXiv paper, GitHub repo, Medium write-up), the project name in the message MUST be a clickable hyperlink. Find the link in Step 3.2.5. Format in markdown: `**[ROMA](https://arxiv.org/...)**`. If no public link exists, leave the name bold-only (`**ROMA**`).
+13. **Writing hygiene (from high-response LinkedIn outreach)** — plain simple English; no flattery ("I love your company"); no desperation ("I would be honored"); no emojis; never share a phone number; conversational tone, not a cover letter; one ask only.
 
 ## The Process
 
-The skill runs in two modes:
-- **Single-job mode** — user gives a URL or company name. Run Phases 1–5, then Phase 6 if a Notion `page_id` is known.
+The skill runs in three modes:
+- **Single-job mode** — user gives a job URL or company name. Run Phases 1–5, then Phase 6 if a Notion `page_id` is known (or Phase 6.5 if Notion opted out).
+- **LinkedIn-post mode** — user gives one or more LinkedIn post URLs (often in a file like `linkedin.md`). For each post: research the poster + company (Phase 1.0), then Phases 2–5. Default output is a local markdown file (Phase 6.5) unless the user asks to write to Notion.
 - **Batch mode** — user says "run for all evaluated jobs" / "draft reachouts for everything in Almost Applied". Phase 0 queries Notion for candidates, then Phases 1–6 run sequentially per job. Findings are written to each job's Notion page under a `## Reachout` header.
 
 ### Phase 0: Query Notion for Candidate Jobs (batch mode only)
@@ -87,6 +92,51 @@ The profile is the same for every job in the batch — load it once before the l
 
 ---
 
+### Phase 1.0: Research LinkedIn Posts (LinkedIn-post mode)
+
+**Goal:** When the input is LinkedIn post URL(s), extract poster + role + company before the normal team research.
+
+**Step 1.0.1 — Fetch each post:**
+
+LinkedIn often blocks plain `WebFetch`. Prefer (in order):
+1. Chrome DevTools MCP (`navigate_page` → `take_snapshot`) when available
+2. `WebSearch` on the poster name + role keywords from the URL slug
+3. `WebFetch` as a fallback
+
+Extract from each post:
+- **Who posted**: name, title, company (or agency, e.g. SuperSourcing)
+- **Post type**: job posting / company hiring blast / thought leadership / product launch / milestone
+- **Role details**: title, location, YOE, compensation signals, must-have skills
+- **CTA they invited**: "DM me", "apply here", email address in the post
+
+**Step 1.0.2 — Classify the poster immediately** (feeds Phase 4.0):
+
+| Signal in title/post | Likely type |
+|---|---|
+| Talent / TA / Recruiter / Leadership Hiring / Sourcer | **Recruiter** |
+| CTO / Founder / Head of X / Eng Manager posting "we're hiring" | **Hiring Manager / Founder** |
+| Same role title as the opening, recent join | **Peer** |
+| Agency domain email (e.g. `@supersourcing.com`) | **Recruiter** (client company may be unnamed — flag it) |
+
+**Step 1.0.3 — Resolve the real company:**
+
+If the poster is an agency recruiter and the company is unnamed, note that in Flags and keep the message recruiter-framed (fit → proof → CV CTA). Do not invent a company thesis.
+
+If the poster is talent at a named company (e.g. Nikki at ExaCare), continue with Phase 1–2 on that company and still find the CTO/HM as backup.
+
+**Step 1.0.4 — Adapt research to post type:**
+
+| Post Type | Research focus |
+|---|---|
+| **Job posting / hiring blast** | Role requirements + company thesis + HM/CTO backup |
+| **Company news/milestone** | Growth area they named → map user's work there |
+| **Thought leadership** | Their specific claim → related experience (peer/HM tone) |
+| **Product launch** | Problem the product solves → user's closest project |
+
+Then continue into Phase 1 (team) / Phase 2 (thesis) as usual.
+
+---
+
 ### Phase 1: Identify the Team Behind the Role
 
 **Goal:** Find out which team posted the listing, who the hiring manager is, and who the research/engineering leads are.
@@ -98,6 +148,7 @@ If the user gives a URL, fetch it. Read the JD for:
 - Who the role reports to (e.g., "meets weekly with the CTO" = CTO is hiring manager)
 - Research areas / tech keywords (e.g., "scalable oversight", "RL environments", "continual learning")
 - Company stage and size (early-stage startup = founder is hiring manager; big company = need team lead)
+- Location / remote / hybrid constraints (flag mismatches with user's location early)
 
 **Step 1.2 — Search the company's careers page and about page:**
 
@@ -220,13 +271,31 @@ Compare the user's profile to the JD's hard requirements. Common gaps:
 - PhD required, user has MS
 - X+ years experience, user has fewer
 - US citizenship required, user is on visa
+- Location mismatch (role is NY/Toronto/onsite; user is elsewhere / remote-only)
 - Specific domain (optical, healthcare, etc.), user has different domain
+- Agency post with unnamed company / comp currency mismatch
 
-**Get ahead of these in the message** — don't hide them. Frame as "honest caveat: the listing asks for X, I have Y — but the building experience maps directly."
+**Get ahead of these in the message** — don't hide them. Frame as "honest caveat: the listing asks for X, I have Y — but the building experience maps directly." Put material gaps in the summary **Flags** column when writing local markdown (Phase 6.5).
 
-### Phase 4: Identify the Best Contact and Channel
+### Phase 4: Classify Contact Type, Then Pick Channel
 
-**Goal:** Pick the single person to message and the best way to reach them.
+**Goal:** Classify who you're messaging (this changes the draft framework), then pick the single best person and channel.
+
+**Step 4.0 — Classify contact type (REQUIRED before drafting):**
+
+| Type | Who | Message focus | Ask |
+|---|---|---|---|
+| **Recruiter** | Talent acquisition, sourcing, agency | Fit criteria → screening answers → CTA | Share CV / confirm alignment |
+| **Hiring Manager** | Team lead who's hiring | Specific challenge → quantified achievement → ask | 20-min chat on the challenge |
+| **Founder / CTO** | Early-stage decision-maker | Named thesis mapping (2 project bullets) → caveat → ask | 20-min compare-builds chat |
+| **Peer** | Someone in a similar role on the team | Genuine interest → shared problem → soft ask | Take on a topic — **NOT a job ask** |
+| **Interviewer** | Someone who will interview you (date known) | Research signal → connection → looking forward | Looking forward to [date] |
+
+**Key rules:**
+- **Peer:** Do NOT ask for a job. The referral happens naturally if the conversation flows. Lead with genuine interest in their work.
+- **Interviewer:** Keep it light. Goal is they know you prepared, not that you're desperate.
+- **Recruiter:** Answer screening questions before they ask (YOE, location/availability, degree, stack). Skip the 2-bullet thesis mapping unless they also own the technical hire.
+- **Always suggest 1–2 backup contacts** with justification (e.g. recruiter primary → CTO backup if no reply).
 
 **Step 4.1 — Rank contacts:**
 
@@ -235,16 +304,18 @@ Compare the user's profile to the JD's hard requirements. Common gaps:
 | 1 | Founder/CTO who posted the role | Early-stage startup (<50 people), they said "DM me", role reports to them |
 | 2 | Founder/CTO (even if didn't post) | Small company where they're the hiring manager |
 | 3 | Team lead / Head of Research | Mid-size company, founder is too senior |
-| 4 | Recent peer hire (same role) | Large company, need a referral inward |
-| 5 | CEO (operations) | Only if founder/CTO unreachable and CEO posted the role |
+| 4 | Recruiter who posted / owns the req | They invited DMs or listed an email — use as primary *channel*, still find HM/CTO as backup |
+| 5 | Recent peer hire (same role) | Large company, need a referral inward |
+| 6 | CEO (operations) | Only if founder/CTO unreachable and CEO posted the role |
 
 **Step 4.2 — Find their contact channel:**
 
 Preferred order:
 1. **Faculty email** (if they're a professor) — `cs.umd.edu/~sfeizi/` lists `sfeizi@cs.umd.edu`. Professors always read their faculty email.
-2. **LinkedIn DM** — if they explicitly said "DM me" in a post, this is the channel they invited
-3. **Guessed email** — `firstname@company.com` is the most common founder pattern. Flag as "try this, may bounce"
-4. **LinkedIn connection request** — for peers and when no email is found
+2. **Email they published in the post** (recruiters often do this) — use it; they invited that channel
+3. **LinkedIn DM** — if they explicitly said "DM me" in a post, this is the channel they invited
+4. **Guessed email** — `firstname@company.com` is the most common founder pattern. Flag as "try this, may bounce"
+5. **LinkedIn connection request** — for peers and when no email is found (note ≤300 chars)
 
 **Step 4.3 — Check for warm-intro angles:**
 
@@ -258,9 +329,9 @@ These go in the **first line** of the message — they're the opener that gets i
 
 ### Phase 5: Draft the Message
 
-**Goal:** Write a concise, personalized message that opens with the warm angle, maps the user's work to the company's thesis, and ends with one specific ask.
+**Goal:** Write a concise, personalized message using the framework that matches the contact type from Phase 4.0.
 
-**Step 5.1 — Subject line (for email):**
+**Step 5.1 — Subject line (for email only):**
 
 Format: `[Status]: [Role title] — [Hook]`
 
@@ -273,19 +344,22 @@ Rules:
 - Name the exact role so they can route it
 - Include the hook (the named mapping) — that's what gets an open
 - Avoid generic subjects like "Following up on my application" or "Excited about [company]"
+- Skip subject entirely for LinkedIn DMs / connection notes
 
-**Step 5.2 — Message body structure (STAY SHORT — see Non-Negotiable #10):**
+**Step 5.2 — Message body by contact type (STAY SHORT — see Non-Negotiable #11):**
 
-Total email body: **≤120 words**. LinkedIn DM: **≤80 words**. No one reads long cold messages — every line must earn its place.
+Hard limits always apply: email ≤120 words, LinkedIn DM ≤80 words, connection note ≤300 chars.
+
+#### 5.2a — Founder / CTO / Hiring Manager (default thesis-mapping framework)
 
 **Paragraph 1 — Warm opener + status (1-2 lines, ≤30 words):**
 - Lead with the warm angle (shared university, "I saw your post about X")
-- State that you applied + name the role in the same line
+- State that you applied + name the role in the same line (skip "applied" if you haven't yet)
 
 **Paragraph 2 — The mapping (THE CORE, 2 bullets):**
 - Exactly **2 bullets**, one per project. Not inline text — actual bullet points (`- `).
 - Each bullet is **one line**: `**[Project](link)** → [company concept]: [headline metric with a number]`
-- The project name MUST be bold AND a hyperlink when a link exists (per Step 3.2.5). Format: `**[ROMA](https://arxiv.org/abs/2602.01848)**` — the shared Notion parser renders this as bold + clickable.
+- The project name MUST be bold AND a hyperlink when a link exists (per Step 3.2.5). Format: `**[ROMA](https://arxiv.org/abs/2602.01848)**`.
 - If no public link exists for the project, use bold-only: `**ProjectName**`.
 - The arrow (`→`) separates the project from the company concept it maps to. The colon separates concept from metric.
 - Example bullet: `**[ROMA](https://arxiv.org/abs/2602.01848)** → your hierarchical reasoning work: 10% SOTA on SEAL-0.`
@@ -296,33 +370,66 @@ Total email body: **≤120 words**. LinkedIn DM: **≤80 words**. No one reads l
 - Skip entirely if there's no material gap. Don't pad.
 
 **Paragraph 4 — One specific ask (1 line, ≤20 words):**
-- "Would 20 min to compare what I built vs. what you're building be useful?"
-- One sentence. No friction-removal list, no "happy to come to your office / jump on a call / send a demo" menu — pick the single lowest-friction option implicitly (a chat).
+- HM: "Would love to hear how your team is approaching [specific challenge]."
+- Founder/CTO: "Would 20 min to compare what I built vs. what you're building be useful?"
+- One sentence. No friction-removal menu.
 
-**Sign-off (2 lines):**
+**Sign-off (email only, 2 lines):**
 - Name + degree/school on one line
 - GitHub OR LinkedIn on one line (not both — pick the stronger for this contact)
 
-**Step 5.3 — LinkedIn DM version (even shorter):**
+#### 5.2b — Recruiter (fit → proof → CTA — NO 2-bullet thesis dump)
 
-LinkedIn connection note limit is 300 chars (~50-60 words). Aim for **≤80 words** so it reads fast in notifications:
+Recruiters screen; they don't debate research theses. Answer their filters up front.
+
+1. **Fit (1 line):** Role + most relevant experience + availability/location
+2. **Proof (1–2 lines):** Pre-answer screening — YOE, degree, stack, one headline metric. Optionally one hyperlinked project if it proves the filter.
+3. **CTA (1 line):** "Happy to share my CV if this aligns with what you're looking for."
+4. **Caveat (optional, 1 line):** Only for hard gaps (YOE, location, visa) — same honest-caveat framing
+
+Example shape:
+> Hi Nikki — saw your post on Senior MLE roles at ExaCare. I'm an AI researcher at Sentient (UMD ML MS, June 2026) with 3+ YOE building production LLM agents.
+>
+> Recent work: **[ROMA](https://arxiv.org/abs/2602.01848)** (10% SOTA hierarchical agents) and **[SERA](https://github.com/khetansarvesh/SERA)** (50% latency drop across 40+ tools).
+>
+> Honest caveat: SF-based — roles list NY/Toronto/Vancouver. Happy to share my CV if you're still open on location.
+
+#### 5.2c — Peer (interest → shared problem → soft ask — NO job ask)
+
+1. **Interest:** Genuine reference to their work — blog, talk, OSS, paper, or a specific thing they shipped
+2. **Connection:** Something you're doing in the same space (not a pitch)
+3. **CTA:** "I've been working on similar problems at [company] — would love your take on [topic]."
+
+#### 5.2d — Interviewer (pre-interview, date known)
+
+1. **Research:** One specific thing about their work/background
+2. **Context:** Light connection to your experience
+3. **CTA:** "Looking forward to our conversation on [date]."
+
+**Step 5.3 — LinkedIn DM / connection-note compression:**
+
 - Drop the subject line
-- Warm opener: 1 line
-- 2 project mappings: 2 lines (same one-line-per-project rule)
-- Honest caveat: only if critical, 1 short line
-- 20-min ask: 1 line
-- Name only (no sign-off links — LinkedIn profile has them)
-- Drop the sign-off links (LinkedIn profile has them)
+- Keep the contact-type framework, but compress to ≤80 words (DM) or ≤300 chars (connection note)
+- Connection notes: often only opener + one proof line + soft ask — drop second project if needed
+- Name only at the end (no sign-off links — LinkedIn profile has them)
 
 **Step 5.4 — Why-this-works commentary:**
 
 After drafting, include a short "Why this works" section explaining the choices — this helps the user understand the strategy and adjust if needed. Cover:
-- Why the opener works (warm angle)
-- Why the mapping works (named projects, quantified)
-- Why the caveat works (gets ahead of gaps)
-- Why the ask works (low friction, specific)
+- Why this contact type / framework was chosen
+- Why the opener works (warm angle / post reference)
+- Why the mapping or proof works (named projects, quantified, or screening answers)
+- Why the caveat works (gets ahead of gaps) — if present
+- Why the ask works (low friction, type-appropriate)
+- Backup contacts if primary goes quiet
 
----
+**Step 5.5 — What NOT to write (anti-patterns):**
+
+BAD: "Hi! I came across your post and was really impressed by SmarterDx's work in healthcare AI. I'm a passionate ML engineer with 3+ years of experience in NLP, RAG, LLMs, and deep learning..."
+
+GOOD: "Hi [Name] — saw your post about the Staff ML Engineer role at SmarterDx. I've been building production AI agents at Sentient, most recently a search agent that beat SOTA by 10% on hierarchical tasks."
+
+Never: flattery, desperation, emoji, phone number, resume dump, multiple asks, buzzword soup.
 
 ### Phase 6: Write Findings to Notion (batch mode, or single-job with a page_id)
 
@@ -390,17 +497,81 @@ Verify the write returned `{"success": true}`. Show the user a one-line confirma
 
 Then immediately proceed to the next job in the batch. Do NOT wait for the user to send the message — sending is manual and happens after the batch completes.
 
+### Phase 6.5: Write to Local Markdown (LinkedIn-post mode, or Notion opted out)
+
+**Goal:** Persist drafts to a local file when the user says "don't upload to Notion" / "just create a file", or when running LinkedIn-post mode without a Notion `page_id`.
+
+**When to use:**
+- User explicitly opts out of Notion
+- Input was LinkedIn post URL(s) / a file like `linkedin.md` and no job Notion pages exist
+- Notion write failed and the user still needs the drafts
+
+**Default filename:** `linkedin_outreach_messages.md` (or a name the user specifies). Do **not** overwrite `linkedin.md` if that file only holds source URLs.
+
+**Required structure:**
+
+```markdown
+# LinkedIn Outreach Messages
+
+Generated: [date]
+
+## Summary
+
+The summary table must be comprehensive — ALL context (post link, location, who to message, why I'm a fit, flags) so the user can act from the table alone.
+
+| # | Company | Role | Location | Person to Message | Post | Why I'm a Fit | Flags |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | [[Company]](#1-company--role) | [Role] | [City/Remote] | [Name, Title] (+ backup if any) | [post](url) | [specific match — projects/metrics] | [concerns or —] |
+
+The Company column links to the section below (anchor: `#1-company--role`, lowercase, hyphens).
+
+---
+
+## 1. [Company] — [Role]
+
+### Team
+- ...
+
+### Fit mapping
+- ...
+
+### Qualification gaps
+- ...
+
+### Recommended contacts
+1. ...
+
+### Draft — LinkedIn DM to [Name]
+
+> [full message]
+
+### Why this works
+- ...
+```
+
+Rules:
+- If a post should be skipped (wrong location, unrelated role, hard gap the user won't accept), still include it in the summary table with the reason in **Flags**, and write `**Skipped** — [reason]` in the message section (or draft with a loud caveat if the user may still want it).
+- Include a short **Send order** section at the bottom when there are multiple posts.
+- Still show drafts in chat for copy-paste; the file is the persistent record when Notion is skipped.
+
+---
+
 ## Output Format
 
 ### Single-job mode
 
-Present in chat AND write to Notion (if page_id known):
+Present in chat AND write to Notion (if page_id known and not opted out) OR local markdown (Phase 6.5):
 
-1. **Team analysis** — who posted the role, hiring manager, team size/stage, peers
-2. **Why this is a good fit** — mapping table (company thesis → user's work), honest gaps
-3. **Recommended contacts** — ranked table with channel
-4. **Draft message** — subject + body + send instructions
-5. **Why this works** — 3-4 strategic bullets
+1. **Contact type** — Recruiter / HM / Founder / Peer / Interviewer (drives framework)
+2. **Team analysis** — who posted the role, hiring manager, team size/stage, peers
+3. **Why this is a good fit** — mapping table (company thesis → user's work), honest gaps
+4. **Recommended contacts** — ranked table with channel + backups
+5. **Draft message** — subject (if email) + body + send instructions
+6. **Why this works** — 3-4 strategic bullets
+
+### LinkedIn-post mode
+
+Same content as single-job, but batched into one local markdown file with a summary table (Phase 6.5). Chat shows a compact per-post summary plus the draft.
 
 ### Batch mode
 
@@ -408,6 +579,7 @@ For each job, show in chat a **compact summary** (not the full draft — that go
 
 ```
 [1/17] Patronus AI — MTS Research Scientist
+  Contact type: Founder/CTO
   Hiring manager: Rebecca Qian (CTO, posted the role)
   Top contact: rebecca@patronus.ai / linkedin.com/in/rebeccaqian
   Fit: EvoData→Generative Simulators, TraceDB→replayable learning envs, LLM-as-Judge→Glider
@@ -445,7 +617,7 @@ If no reply after the first message:
 ### Founder / CTO (early-stage startup)
 - They posted the role and said "DM me" → LinkedIn DM is the channel
 - Reference their personal research page or recent blog post
-- Lead with the technical mapping, not credentials
+- Lead with the technical mapping (Phase 5.2a), not credentials
 - Be direct — founders value brevity and signal
 
 ### Professor / Faculty founder
@@ -455,28 +627,39 @@ If no reply after the first message:
 - Offer to come to their office (if same university)
 
 ### Hiring Manager (mid-size company)
-- Find them on LinkedIn, send a connection request with a note
+- Find them on LinkedIn; connection note ≤300 chars or InMail ≤80 words
 - Reference the team's specific product/feature, not the company broadly
-- Focus on how you'd hit the ground running on their current problems
+- Hook = specific challenge; proof = one quantified achievement; ask = how they're approaching it
+
+### Recruiter / Talent / Agency
+- Use Phase 5.2b (fit → proof → CV CTA) — do not dump a 2-bullet research thesis
+- Pre-answer YOE, location, start date, degree, stack
+- If they listed an email in the post, use that channel
+- Always find HM/CTO as backup; if agency and company is unnamed, flag it and keep the ask at CV-share / "right level"
 
 ### Peer (recent hire, same role)
-- LinkedIn connection request, casual tone
+- LinkedIn connection request, casual tone — Phase 5.2c
 - Lead with genuine interest in their work, NOT a job ask
 - Ask about their experience at the company — the referral happens naturally
-- Frame: "saw you joined [company] as [role] recently — I'm applying and would love to hear what the team is like"
+- Frame: "saw you joined [company] as [role] recently — I've been working on [related problem] and would love your take on [topic]"
+
+### Interviewer (date known)
+- Phase 5.2d only — light research signal, no pitch, no ask for a job
 
 ## Common Mistakes to Avoid
 
-1. **Generic flattery** — "I love your company's mission" is useless. Name a specific piece of their work.
-2. **Listing your resume** — the message is a mapping, not a recap. Pick **2 projects** that map (per Non-Negotiable #10), skip the rest. Listing 3-4 projects signals you can't prioritize.
-3. **Asking for a job** — ask for a 20-min conversation. The job ask is implicit and comes across as higher-agency.
-4. **Long messages** — email body MUST be ≤120 words, LinkedIn DM ≤80 words. Hard limits, not guidelines. A cold message that takes >30 seconds to read gets ignored. Every sentence must earn its place.
-5. **Multi-line project descriptions** — each of your 2 projects gets ONE bullet line: bold hyperlinked name + company concept + headline metric. If you need a second line to explain the project, it's not punchy enough — rewrite it or pick a different project.
-6. **Unlinked project names** — if a project has a public arXiv/GitHub/Medium link, the name MUST be a hyperlink (`**[ROMA](url)**`). An unlinked name when a link exists is a missed credibility signal — the reader can't verify your work in one click. Run Step 3.2.5 before drafting.
-6. **Hiding qualification gaps** — if they asked for a PhD and you have an MS, say so in one line. They'll find out from your application anyway; getting ahead builds trust.
-7. **Skipping the research** — a message that could be sent to any company will be ignored. The 30 minutes of research is what makes it land.
-8. **Wrong contact** — don't email the CEO if the CTO posted the role. Don't message a peer if the founder is reachable. Rank contacts and pick #1.
-9. **No specific ask** — "let me know if you'd like to chat" is weak. "Would 20 min to compare what I built vs. what you're building be useful?" is strong.
+1. **Wrong contact-type framework** — messaging a recruiter with a founder thesis dump (or a peer with a job ask) gets ignored. Classify first (Phase 4.0).
+2. **Generic flattery** — "I love your company's mission" is useless. Name a specific piece of their work or their actual post.
+3. **Listing your resume** — the message is a mapping (or screening answers), not a recap. For HM/founder: pick **2 projects**. For recruiter: one proof line. Listing 3-4 projects signals you can't prioritize.
+4. **Asking for a job (to HM/founder/peer)** — ask for a 20-min conversation (or a peer's take). The job ask is implicit. Exception: recruiters — CV CTA is correct.
+5. **Long messages** — email ≤120 words, LinkedIn DM ≤80 words, connection note ≤300 chars. Hard limits. A cold message that takes >30 seconds to read gets ignored.
+6. **Multi-line project descriptions** — each of your 2 projects gets ONE bullet line: bold hyperlinked name + company concept + headline metric. If you need a second line, rewrite or pick a different project.
+7. **Unlinked project names** — if a project has a public arXiv/GitHub/Medium link, the name MUST be a hyperlink (`**[ROMA](url)**`). Run Step 3.2.5 before drafting.
+8. **Hiding qualification gaps** — if they asked for a PhD / 10+ YOE / a city you're not in, say so in one line. They'll find out anyway; getting ahead builds trust.
+9. **Skipping the research** — a message that could be sent to any company will be ignored. The research is what makes it land. For LinkedIn posts, reference the actual post content.
+10. **Wrong contact** — don't email the CEO if the CTO posted the role. Don't stop at the recruiter if the founder is reachable as backup. Rank contacts and pick #1 + backups.
+11. **No specific ask** — "let me know if you'd like to chat" is weak. Type-appropriate asks only (Phase 4.0 / 5.2).
+12. **Flattery, desperation, emojis, phone numbers** — kill response rate. Keep plain, specific, human.
 
 ## File Structure
 
@@ -508,5 +691,5 @@ To also run reachouts for jobs you've already submitted (often the best time —
 - **job-apply** — Fill the application form (run this BEFORE reachout, so the message is a signal-boost)
 - **job-eval** — Evaluate the offer (run this to decide if reachout is worth the effort)
 - **job-cv-tailor** — Generate a tailored CV (the reachout message references the same projects)
-- **linkedin-outreach** — Lighter-weight LinkedIn message drafter (use this skill instead for the full research-to-draft pipeline)
+- **linkedin-outreach** — Absorbed into this skill (contact-type frameworks, LinkedIn-post mode, local markdown output, writing hygiene). Prefer **job-reachout** for all hiring outreach; keep `linkedin-outreach` only as a thin pointer if referenced elsewhere.
 - **job-interview-prep** — If the reachout lands a conversation, switch to interview prep
