@@ -40,8 +40,8 @@ After a job application is submitted (or when the user shares a hiring LinkedIn 
 9. **One concrete ask** — always end with a specific, low-friction request. Ask type depends on contact: recruiter → "happy to share CV"; HM/founder → "20-min chat to compare what I built vs. what you're building"; peer → soft topic ask, NOT a job ask
 10. **Write findings back to Notion in batch mode** — unless the user explicitly opts out. Full reachout section goes under a `## Reachout` header. Chat shows the draft for copy-paste; Notion is the persistent record. If opted out, write a local markdown file (Phase 6.5).
 11. **NEVER overwrite an existing Reachout section** — if a page already has one, skip it (re-runs produce a new dated section, preserving history). Always check before writing.
-12. **SHORT MESSAGES ONLY — this is the #1 reason cold messages get ignored.** Hard limits: email body ≤120 words, LinkedIn DM ≤80 words, connection request note ≤300 characters. For HM/founder messages: pick exactly **2 projects** — each gets **one bullet line**: bold hyperlinked project name + the company concept it maps to + one headline metric. For recruiter messages: skip the 2-bullet mapping; use fit → proof → CTA instead (see Phase 5.2b). No sub-bullets, no expansion, no "happy to come to your office / jump on a call / send a demo" menu.
-13. **ALWAYS hyperlink the project name** — if the project has a public link (arXiv paper, GitHub repo, Medium write-up), the project name in the message MUST be a clickable hyperlink. Find the link in Step 3.2.5. Format in markdown: `**[ROMA](https://arxiv.org/...)**`. If no public link exists, leave the name bold-only (`**ROMA**`).
+12. **SHORT MESSAGES ONLY — this is the #1 reason cold messages get ignored.** Hard limits: email body ≤120 words, LinkedIn DM ≤80 words, connection request note ≤300 characters. For HM/founder messages: pick exactly **2 projects** — each gets **one bullet line**: bold hyperlinked project name + the company concept it maps to + one headline metric. For recruiter messages: skip the thesis-mapping framing, but still list proof projects as **bold bullets** (see Phase 5.2b). No sub-bullets, no expansion, no "happy to come to your office / jump on a call / send a demo" menu.
+13. **ALWAYS bold + hyperlink project names, ALWAYS as bullets** — every named project in email, LinkedIn DM, or recruiter proof MUST appear as a markdown bullet (`- `) with the project name bold. If a public link exists, format `**[ROMA](https://arxiv.org/...)**`. If no public link, bold-only (`**ROMA**`). Never flatten projects into inline prose ("Recent work: ROMA and SERA…"). Find links in Step 3.2.5. Exception: connection-request notes (≤300 chars) may keep one bold project inline if a second bullet won't fit.
 14. **Writing hygiene (from high-response LinkedIn outreach)** — plain simple English; no flattery ("I love your company"); no desperation ("I would be honored"); no emojis; never share a phone number; conversational tone, not a cover letter; one ask only.
 
 ## The Process
@@ -246,11 +246,13 @@ For every project that might appear in the message, find its public URL. This is
 
 Search in this order and pick the FIRST hit:
 
-1. **The user's GitHub repos** — check `https://api.github.com/users/{github_username}/repos?per_page=100` for a repo matching the project name (case-insensitive). Use `{repo.html_url}`.
+1. **Known inventory override** — if the project is in the table below, use that link (do not substitute GitHub when a blog/arXiv/Medium URL is listed).
 2. **arXiv** — run `web_search_exa query: "{project_name}" arxiv {user_name}` — if the user co-authored a paper, use `https://arxiv.org/abs/{id}`.
-3. **The official/org GitHub** — run `web_search_exa query: "{project_name}" github {org_name}` (e.g. "ROMA github sentient-agi") — if the project lives in an org repo the user contributed to, use that.
+3. **Company / personal blog write-up** — prefer a published article over a raw repo when both exist (e.g. Sentient blog for SERA).
 4. **Medium / personal blog** — run `web_search_exa query: "site:{user_medium} {project_name}"` — if there's a project-specific write-up, use that URL.
-5. **Google Scholar** — run `web_search_exa query: "{user_name}" google scholar` — save the Scholar profile URL; use it as the fallback link for any published project that has no per-project URL.
+5. **The official/org GitHub** — run `web_search_exa query: "{project_name}" github {org_name}` (e.g. "ROMA github sentient-agi") — if the project lives in an org repo the user contributed to, use that.
+6. **The user's GitHub repos** — check `https://api.github.com/users/{github_username}/repos?per_page=100` for a repo matching the project name (case-insensitive). Use `{repo.html_url}` only when no blog/arXiv/Medium link exists.
+7. **Google Scholar** — run `web_search_exa query: "{user_name}" google scholar` — save the Scholar profile URL; use it as the fallback link for any published project that has no per-project URL.
 
 If none of the above yields a project-specific URL, leave the Link column as `—` and the name will be bold-only (not hyperlinked) in the message.
 
@@ -260,7 +262,7 @@ If none of the above yields a project-specific URL, leave the Link column as `�
 |---|---|---|
 | ROMA | https://arxiv.org/abs/2602.01848 | arXiv paper |
 | EvoSkill | https://arxiv.org/abs/2603.02766 | arXiv paper |
-| SERA | https://github.com/khetansarvesh/SERA | GitHub repo |
+| SERA | https://www.sentient.xyz/blog/how-to-build-a-faster-and-smarter-agent-by-pre-filtering-tools-with-rag | Sentient blog (do **not** use the GitHub repo in messages) |
 | Deep Research (Strategy) | https://khetansarvesh.medium.com/search-deep-research-agents-a7b6f3ae6d32 | Medium article |
 | Google Scholar (all pubs) | https://scholar.google.com/citations?user=MSW5-VMAAAAJ | fallback |
 
@@ -418,19 +420,21 @@ Hard limits always apply: email ≤120 words, LinkedIn DM ≤80 words, connectio
 - Name + degree/school on one line
 - GitHub OR LinkedIn on one line (not both — pick the stronger for this contact)
 
-#### 5.2b — Recruiter (fit → proof → CTA — NO 2-bullet thesis dump)
+#### 5.2b — Recruiter (fit → proof → CTA — NO thesis-mapping dump)
 
-Recruiters screen; they don't debate research theses. Answer their filters up front.
+Recruiters screen; they don't debate research theses. Answer their filters up front. Still format named projects as **bold bullets** (not inline prose).
 
 1. **Fit (1 line):** Role + most relevant experience + availability/location
-2. **Proof (1–2 lines):** Pre-answer screening — YOE, degree, stack, one headline metric. Optionally one hyperlinked project if it proves the filter.
+2. **Proof (2 bullets):** Up to 2 projects as actual `- ` bullets — each `**[Project](link)**`: [headline metric]. Pre-answer YOE/degree/stack in the fit line, not inside the bullets.
 3. **CTA (1 line):** "Happy to share my CV if this aligns with what you're looking for."
 4. **Caveat (optional, 1 line):** Only for hard gaps (YOE, location, visa) — same honest-caveat framing
 
 Example shape:
-> Hi Nikki — saw your post on Senior MLE roles at ExaCare. I'm an AI researcher at Sentient (UMD ML MS, June 2026) with 3+ YOE building production LLM agents.
+> Hi Nikki,
+I saw your post on Senior MLE roles at ExaCare. I'm an AI researcher at Sentient (UMD ML MS, June 2026) with 3+ YOE building production LLM agents.
 >
-> Recent work: **[ROMA](https://arxiv.org/abs/2602.01848)** (10% SOTA hierarchical agents) and **[SERA](https://github.com/khetansarvesh/SERA)** (50% latency drop across 40+ tools).
+> - **[ROMA](https://arxiv.org/abs/2602.01848)**: 10% SOTA hierarchical agents
+> - **[SERA](https://www.sentient.xyz/blog/how-to-build-a-faster-and-smarter-agent-by-pre-filtering-tools-with-rag)**: 50% latency drop across 40+ tools
 >
 > Honest caveat: SF-based — roles list NY/Toronto/Vancouver. Happy to share my CV if you're still open on location.
 
@@ -450,7 +454,14 @@ Example shape:
 
 - Drop the subject line
 - Keep the contact-type framework, but compress to ≤80 words (DM) or ≤300 chars (connection note)
-- Connection notes: often only opener + one proof line + soft ask — drop second project if needed
+- **LinkedIn DMs MUST still use bold project bullets** — do not "compress away" formatting. Keep the 2-project block as:
+  ```
+  - **[Project](link)** → [concept]: [metric]
+  - **[Project](link)** → [concept]: [metric]
+  ```
+  (Recruiter DMs: same bullet shape without the `→ concept` mapping — just `**[Project](link)**: [metric]`.)
+- Never write projects as unbolded plain text or as a single inline sentence
+- Connection notes: often only opener + one bold project + soft ask — drop second project if needed; bold the project name even when inline
 - Name only at the end (no sign-off links — LinkedIn profile has them)
 
 **Step 5.4 — Why-this-works commentary:**
@@ -710,11 +721,11 @@ If no reply after the first message:
 
 1. **Wrong contact-type framework** — messaging a recruiter with a founder thesis dump (or a peer with a job ask) gets ignored. Classify first (Phase 4.0).
 2. **Generic flattery** — "I love your company's mission" is useless. Name a specific piece of their work or their actual post.
-3. **Listing your resume** — the message is a mapping (or screening answers), not a recap. For HM/founder: pick **2 projects**. For recruiter: one proof line. Listing 3-4 projects signals you can't prioritize.
+3. **Listing your resume** — the message is a mapping (or screening answers), not a recap. For HM/founder: pick **2 projects**. For recruiter: up to 2 proof bullets. Listing 3-4 projects signals you can't prioritize.
 4. **Asking for a job (to HM/founder/peer)** — ask for a 20-min conversation (or a peer's take). The job ask is implicit. Exception: recruiters — CV CTA is correct.
 5. **Long messages** — email ≤120 words, LinkedIn DM ≤80 words, connection note ≤300 chars. Hard limits. A cold message that takes >30 seconds to read gets ignored.
 6. **Multi-line project descriptions** — each of your 2 projects gets ONE bullet line: bold hyperlinked name + company concept + headline metric. If you need a second line, rewrite or pick a different project.
-7. **Unlinked project names** — if a project has a public arXiv/GitHub/Medium link, the name MUST be a hyperlink (`**[ROMA](url)**`). Run Step 3.2.5 before drafting.
+7. **Unbolded / unbulleted / unlinked project names** — never write `Recent work: ROMA and SERA…`. Always `- **[Project](url)**: …`. Prefer blog/arXiv/Medium over GitHub when the inventory says so (SERA → Sentient blog, not the repo). Run Step 3.2.5 before drafting.
 8. **Hiding qualification gaps** — if they asked for a PhD / 10+ YOE / a city you're not in, say so in one line. They'll find out anyway; getting ahead builds trust.
 9. **Skipping the research** — a message that could be sent to any company will be ignored. The research is what makes it land. For LinkedIn posts, reference the actual post content.
 10. **Wrong contact** — don't email the CEO if the CTO posted the role. Don't stop at the recruiter if the founder is reachable as backup. Rank contacts and pick #1 + backups.
