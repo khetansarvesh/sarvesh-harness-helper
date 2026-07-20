@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ai-skills-repo installer — multi-target agent harness installer.
+ * @sarveshkhetan/shh installer — multi-target agent harness installer.
  *
  * Symlinks agents/, commands/, rules/, skills/, hooks, and mcp config from
  * this repository's canonical source directory into each supported agent
@@ -20,7 +20,7 @@
  *   node scripts/install.cjs --with skills,hooks,mcp
  *   node scripts/install.cjs --without rules
  *   node scripts/install.cjs --force                    # overwrite existing files/links
- *   npx ai-skills-install                               # when published to npm
+ *   shh                                                # when published to npm as @sarveshkhetan/shh
  */
 
 'use strict';
@@ -202,7 +202,7 @@ function helpText() {
     return `  ${t.padEnd(8)} ${TARGETS[t].root()}  [${sup.join(', ')}]`;
   }).join('\n');
   return `
-ai-skills-repo installer — multi-target agent harness installer
+sarvesh-harness-helper installer — multi-target agent harness installer
 
 Symlinks agents/commands/rules (and optionally skills/hooks/mcp) from this
 repository into each harness's global config directory. Always global, always
@@ -211,7 +211,7 @@ components are skipped with a note.
 
 Usage:
   node scripts/install.cjs [options]
-  npx ai-skills-install [options]
+  shh [options]                           # via 'npm install -g @sarveshkhetan/shh'
 
 Options:
   --target <name>     Target harness: ${TARGET_IDS.join(', ')}, or 'all' (default: claude)
@@ -224,7 +224,7 @@ Options:
   --i-understand-the-cache-is-ephemeral
                       Acknowledge that running via 'npx' installs to npm's
                       ephemeral cache; symlinks may break when it is cleaned.
-                      Prefer 'npm install -g' + 'ai-skills-install' for stability.
+                      Prefer 'npm install -g @sarveshkhetan/shh' + 'shh' for stability.
 
 Components:
 ${compList}
@@ -259,9 +259,9 @@ function resolveSourceRoot() {
   if (fs.existsSync(path.join(here, 'agents'))) return here;
   throw new Error(
     `Could not locate the repository root (expected agents/ next to scripts/).\n` +
-    `Run this from a clone of ai_skills_repo, or install it globally with:\n` +
-    `  npm install -g <package-name>\n` +
-    `then run: ai-skills-install`
+    `Run this from a clone of sarvesh-harness-helper, or install it globally with:\n` +
+    `  npm install -g @sarveshkhetan/shh\n` +
+    `then run: shh`
   );
 }
 
@@ -451,7 +451,7 @@ function main() {
       `dangling symlinks in ~/.claude/, ~/.cursor/, etc.\n\n` +
       `For a stable install, use the global install instead:\n` +
       `  npm install -g ${name}\n` +
-      `  ai-skills-install\n\n` +
+      `  shh\n\n` +
       `To proceed anyway (e.g. for a quick test), re-run with --i-understand-the-cache-is-ephemeral.\n`
     );
     if (!opts.acceptEphemeral) process.exit(2);

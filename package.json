@@ -1,7 +1,16 @@
 {
-  "name": "ai-skills-repo",
+  "name": "@sarveshkhetan/shh",
   "version": "1.0.0",
-  "description": "AI skills and automation tools",
+  "description": "Sarvesh's harness helper — agents, commands, rules, skills, hooks, and mcp config for Claude Code, Cursor, Codex, and pi. Symlinked from a single source.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khetansarvesh/sarvesh-harness-helper.git"
+  },
+  "homepage": "https://github.com/khetansarvesh/sarvesh-harness-helper#readme",
+  "bugs": {
+    "url": "https://github.com/khetansarvesh/sarvesh-harness-helper/issues"
+  },
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "test:skills": "node --test scripts/ci/validate-skills.test.js",
@@ -17,7 +26,7 @@
     "install": "node scripts/install.cjs"
   },
   "bin": {
-    "ai-skills-install": "scripts/install.cjs"
+    "shh": "scripts/install.cjs"
   },
   "publishConfig": {
     "access": "public"
@@ -30,7 +39,6 @@
     "hooks.json",
     "mcp-servers.json",
     "scripts/install.cjs",
-    "AGENTS.md",
     "README.md"
   ],
   "dependencies": {

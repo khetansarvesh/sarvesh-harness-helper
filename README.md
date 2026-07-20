@@ -1,29 +1,29 @@
-# AI Skills Repository
+# Sarvesh's Harness Helper (`@sarveshkhetan/shh`)
 
 A public library of reusable agent skills, subagents, commands, and rules. Install everything with one command via npm — no clone required.
 
 ## Install
 
-The repo ships its own installer (`scripts/install.cjs`, exposed as the `ai-skills-install` bin) that symlinks [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), and optionally [`skills/`](./skills/), hooks, and mcp config into each supported agent harness's global config directory so there is a single source of truth — edit the repo and every linked harness sees the change instantly. Install is **always global and always symlink-based**.
+The repo ships its own installer (`scripts/install.cjs`, exposed as the `shh` bin) that symlinks [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), and optionally [`skills/`](./skills/), hooks, and mcp config into each supported agent harness's global config directory so there is a single source of truth — edit the repo and every linked harness sees the change instantly. Install is **always global and always symlink-based**.
 
 Because it symlinks rather than copies, the package must live at a **stable path**. There are two stable install methods:
 
 ### From npm (no clone required) — for end users
 
 ```bash
-npm install -g ai-skills-repo          # stable global install
-ai-skills-install                      # claude: agents+commands+rules → ~/.claude/
+npm install -g @sarveshkhetan/shh        # stable global install
+shh                                    # claude: agents+commands+rules → ~/.claude/
 ```
 
-Update later with `npm update -g ai-skills-repo`. Uninstall with `npm uninstall -g ai-skills-repo`.
+Update later with `npm update -g @sarveshkhetan/shh`. Uninstall with `npm uninstall -g @sarveshkhetan/shh`.
 
-> **Don't use `npx ai-skills-install`.** npx downloads to an ephemeral cache that gets cleaned periodically; symlinks pointing there will dangle. The installer detects this and refuses unless you pass `--i-understand-the-cache-is-ephemeral`. Use `npm install -g` for a stable install.
+> **Don't use `npx @sarveshkhetan/shh`.** npx downloads to an ephemeral cache that gets cleaned periodically; symlinks pointing there will dangle. The installer detects this and refuses unless you pass `--i-understand-the-cache-is-ephemeral`. Use `npm install -g` for a stable install.
 
 ### From a clone — for you (the author) or contributors
 
 ```bash
-git clone https://github.com/khetansarvesh/ai_skills_repo
-cd ai_skills_repo
+git clone https://github.com/khetansarvesh/sarvesh-harness-helper
+cd sarvesh-harness-helper
 npm run install                         # claude: agents+commands+rules → ~/.claude/
 ```
 
@@ -72,7 +72,7 @@ Components a target doesn't support are skipped with a note (e.g. `commands` on 
 ### Compatibility
 
 - **Portable skills:** directories under [`skills/`](./skills/) containing `SKILL.md`; these are the supported public installation surface.
-- **Claude Code integrations:** [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), [`hooks.json`](./hooks.json), and [`mcp-servers.json`](./mcp-servers.json) are installed by the repo's own installer (`npm install -g ai-skills-repo` + `ai-skills-install`, or `npm run install` from a clone), which symlinks them into the target harness's global config directory.
+- **Claude Code integrations:** [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), [`hooks.json`](./hooks.json), and [`mcp-servers.json`](./mcp-servers.json) are installed by the repo's own installer (`npm install -g @sarveshkhetan/shh` + `shh`, or `npm run install` from a clone), which symlinks them into the target harness's global config directory.
 - **Executable tools:** a future skill that wraps its own command-line tool may follow the separate AXI pattern—publish an npm package and have its skill invoke `npx -y <package>`. This repository's markdown workflow skills do not require a custom npm installer.
 
 ## Contributing skills
