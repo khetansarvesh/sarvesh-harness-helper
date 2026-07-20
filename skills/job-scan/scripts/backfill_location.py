@@ -16,10 +16,8 @@ import re
 import sys
 import urllib.request
 
-# Setup paths
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-from scripts.notion.config import NOTION_TOKEN, NOTION_DB_APPLICATIONS
-from scripts.notion.notion_client import notion_request
+from sarvesh_ai_notion_interface.config import NOTION_TOKEN, NOTION_DB_APPLICATIONS
+from sarvesh_ai_notion_interface.notion_client import notion_request
 
 # Import enrichment logic
 sys.path.insert(0, os.path.dirname(__file__))

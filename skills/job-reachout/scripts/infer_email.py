@@ -32,13 +32,9 @@ import unicodedata
 from collections import Counter
 from dataclasses import asdict, dataclass
 
-_REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-sys.path.insert(0, os.path.join(_REPO_ROOT, "scripts", "notion"))
-sys.path.insert(0, os.path.join(_REPO_ROOT, "skills", "job-eval"))
-
-from config import NOTION_DB_COMPANIES  # noqa: E402
-from get_referrals import fetch_contact  # noqa: E402
-from notion_client import load_all_rows  # noqa: E402
+from sarvesh_ai_notion_interface.config import NOTION_DB_COMPANIES
+from sarvesh_ai_notion_interface.notion_client import load_all_rows
+from get_referrals import fetch_contact
 
 
 PERSONAL_DOMAINS = {

@@ -133,7 +133,7 @@ generate_input_from_notion() {
   echo "Querying Notion for 'Scanned' jobs..."
 
   local json
-  json=$(python3 "$REPO_ROOT/scripts/notion/db_applications.py" query --status "Scanned" 2>&1)
+  json=$(python3 -m sarvesh_ai_notion_interface.db_applications query --status "Scanned" 2>&1)
 
   local count
   count=$(echo "$json" | python3 -c "import sys,json; print(json.load(sys.stdin)['count'])" 2>/dev/null || echo "0")

@@ -7,6 +7,21 @@ description: Fill job applications using Chrome DevTools MCP — triggers Simpli
 
 Automate job application filling using Chrome DevTools MCP tools. Uses the Simplify browser extension for initial auto-fill, then intelligently fills remaining fields from the user's resume and project descriptions.
 
+## Setup
+
+**Requirements**
+- Python 3.10+
+- Install the Notion integration package:
+  ```bash
+  python -m pip install sarvesh-ai-notion-interface
+  ```
+- Notion access via environment variables or a `.env` file in your working directory:
+  - `NOTION_TOKEN` — Notion integration token (required)
+  - Database IDs as needed: `NOTION_DB_APPLICATIONS`, `NOTION_DB_COMPANIES`, `NOTION_DB_CONNECTIONS`
+  - Page IDs as needed: `NOTION_PAGE_PARENT`, `NOTION_PAGE_RESUME`, `NOTION_PAGE_PROJECTS`
+
+The Notion integration package (`sarvesh-ai-notion-interface`) is published on PyPI and contains all database helpers for job tracking.
+
 ## When to Activate
 
 - User asks to fill/apply to job applications
@@ -17,8 +32,8 @@ Automate job application filling using Chrome DevTools MCP tools. Uses the Simpl
 - Chrome browser open with Chrome DevTools MCP connected
 - Simplify browser extension installed in Chrome
 - Profile data filled in:
-  - `Notion (fetch via `python3 scripts/notion/page_reader.py resume`)` — personal info, education, experience, skills (shared, at repo root)
-  - `Notion (fetch via `python3 scripts/notion/page_reader.py projects`)` — project descriptions and reusable answer snippets (shared, at repo root)
+  - `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader resume`)` — personal info, education, experience, skills
+  - `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader projects`)` — project descriptions and reusable answer snippets
 - (Optional) Prior evaluation from **job-eval** — if the role was evaluated, the skill uses the evaluation report for smarter, archetype-aware answer generation
 - `NOTION_TOKEN` environment variable set — for querying evaluated jobs and updating status
 
@@ -47,7 +62,7 @@ Automate job application filling using Chrome DevTools MCP tools. Uses the Simpl
 
 Run the query script to get all "Evaluated" jobs from Notion:
 ```bash
-python3 scripts/notion/db_applications.py query --status "Evaluated"
+python3 -m sarvesh_ai_notion_interface.db_applications query --status "Evaluated"
 ```
 
 Parse the JSON output — get list of `{page_id, company, role, url, score}`.
@@ -67,15 +82,15 @@ Proceed with all N?
 
 Read profile files to have all user data available:
 
-- Read `Notion (fetch via `python3 scripts/notion/page_reader.py resume`)` for structured data (name, email, education, experience, skills)
-- Read `Notion (fetch via `python3 scripts/notion/page_reader.py projects`)` for project summaries and reusable answer snippets
+- Read `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader resume`)` for structured data (name, email, education, experience, skills)
+- Read `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader projects`)` for project summaries and reusable answer snippets
 - For open-ended questions requiring detailed answers, fetch project context from Notion:
   ```bash
-  python3 scripts/notion/page_reader.py roma          # ROMA recursive deep search agent
-  python3 scripts/notion/page_reader.py sera          # SERA semantic embedding agent
-  python3 scripts/notion/page_reader.py mroma         # m-ROMA multimodal extension
-  python3 scripts/notion/page_reader.py deep-research # Multi-agent deep research at Strategy
-  python3 scripts/notion/page_reader.py txt2sql       # Text2SQL agent at Piramal
+  python3 -m sarvesh_ai_notion_interface.page_reader roma          # ROMA recursive deep search agent
+  python3 -m sarvesh_ai_notion_interface.page_reader sera          # SERA semantic embedding agent
+  python3 -m sarvesh_ai_notion_interface.page_reader mroma         # m-ROMA multimodal extension
+  python3 -m sarvesh_ai_notion_interface.page_reader deep-research # Multi-agent deep research at Strategy
+  python3 -m sarvesh_ai_notion_interface.page_reader txt2sql       # Text2SQL agent at Piramal
   ```
   Requires `NOTION_TOKEN` env var set.
 
@@ -86,7 +101,7 @@ If profile files are empty/incomplete, warn the user and ask them to fill in the
 Each row in the Notion database is a page. The evaluation report is stored as the page body content. Fetch it using the existing script with the page_id directly:
 ```bash
 # The page_id comes from db_applications.py query output
-python3 scripts/notion/page_reader.py {page_id}
+python3 -m sarvesh_ai_notion_interface.page_reader {page_id}
 ```
 If the page body has content, extract:
 - **Archetype** — determines answer framing (Research Engineer answers differ from Applied AI answers)
@@ -184,7 +199,7 @@ For open-ended questions, follow these strict rules:
 - **Use real numbers** — percentages, dollar amounts, team sizes, time saved
 - **No generic statements** — every answer must reference a specific project, tool, or metric from the profile
 - **Read the question carefully** — answer exactly what's asked, nothing more
-- Fetch detailed project context from Notion (`python3 scripts/notion/page_reader.py {project}`) when composing answers
+- Fetch detailed project context from Notion (`python3 -m sarvesh_ai_notion_interface.page_reader {project}`) when composing answers
 - **Cite the project link in parentheses** — see "Project link citations" below. This is mandatory whenever a public URL exists.
 
 #### Project link citations (REQUIRED for open-ended answers)
@@ -293,7 +308,7 @@ Take a screenshot of the completed form for reference.
 
 Update the row to "Almost Applied":
 ```bash
-python3 scripts/notion/db_applications.py update-status --page-id "{page_id}" --status "Almost Applied"
+python3 -m sarvesh_ai_notion_interface.db_applications update-status --page-id "{page_id}" --status "Almost Applied"
 ```
 
 #### 3h. Move to Next Job

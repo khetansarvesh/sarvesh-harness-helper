@@ -9,6 +9,21 @@ Process multiple job offers in parallel. Each worker runs a full A-G evaluation 
 
 Each worker produces a report + tracker entry. The orchestrator manages the coordination.
 
+## Setup
+
+**Requirements**
+- Python 3.10+; Bash for the batch runner
+- Install the Notion integration package:
+  ```bash
+  python -m pip install sarvesh-ai-notion-interface
+  ```
+- Notion access via environment variables or a `.env` file in your working directory:
+  - `NOTION_TOKEN` — Notion integration token (required)
+  - Database IDs as needed: `NOTION_DB_APPLICATIONS`, `NOTION_DB_COMPANIES`, `NOTION_DB_CONNECTIONS`
+  - Page IDs as needed: `NOTION_PAGE_PARENT`, `NOTION_PAGE_RESUME`, `NOTION_PAGE_PROJECTS`
+
+The Notion integration package (`sarvesh-ai-notion-interface`) is published on PyPI and contains all database helpers for job tracking.
+
 ## When to Activate
 
 - User has 3+ job offers to evaluate
@@ -20,7 +35,7 @@ Each worker produces a report + tracker entry. The orchestrator manages the coor
 
 - **`claude` CLI** installed and authenticated
 - **NOTION_TOKEN** environment variable set
-- `Notion (fetch via `python3 scripts/notion/page_reader.py resume`)` and `Notion (fetch via `python3 scripts/notion/page_reader.py projects`)` populated
+- `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader resume`)` and `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader projects`)` populated
 - URLs to evaluate (in `batch-data/batch-input.tsv` or use `--from-notion` to pull "Scanned" jobs)
 
 ## Non-Negotiables
@@ -57,25 +72,25 @@ Workers apply two automatic disqualification filters **before** the expensive A-
 
 ```bash
 # Pull "Scanned" jobs from Notion and evaluate in parallel
-bash skills/job-eval/batch-runner.sh --from-notion --parallel 4
+bash batch-runner.sh --from-notion --parallel 4
 
 # Preview what would be processed (no execution)
-bash skills/job-eval/batch-runner.sh --from-notion --dry-run
+bash batch-runner.sh --from-notion --dry-run
 
 # Evaluate all offers in batch-input.tsv (manual input)
-bash skills/job-eval/batch-runner.sh
+bash batch-runner.sh
 
 # Evaluate 4 offers in parallel
-bash skills/job-eval/batch-runner.sh --parallel 4
+bash batch-runner.sh --parallel 4
 
 # Retry only failed offers
-bash skills/job-eval/batch-runner.sh --retry-failed --parallel 2
+bash batch-runner.sh --retry-failed --parallel 2
 
 # Start from offer #10, max 3 retries each
-bash skills/job-eval/batch-runner.sh --start-from 10 --max-retries 3
+bash batch-runner.sh --start-from 10 --max-retries 3
 
 # Skip tracker entries for low-scoring offers
-bash skills/job-eval/batch-runner.sh --min-score 3.5 --parallel 4
+bash batch-runner.sh --min-score 3.5 --parallel 4
 ```
 
 ### CLI Arguments

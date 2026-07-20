@@ -18,10 +18,7 @@ import json
 import os
 from datetime import datetime, timedelta, timezone
 
-import sys as _sys
-import os as _os
-_sys.path.insert(0, _os.path.join(_os.path.dirname(__file__), "..", "..", ".."))
-from scripts.notion.db_companies import load_companies
+from sarvesh_ai_notion_interface.db_companies import load_companies
 from api_helpers.api_job_fetcher import fetch_and_filter
 from api_helpers.api_resolver import resolve
 

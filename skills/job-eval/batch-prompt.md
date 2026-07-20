@@ -13,9 +13,9 @@ You are a batch evaluation worker. You receive a job offer (URL + JD text) and p
 
 | File | Path | When |
 |------|------|------|
-| Resume | `Notion (fetch via `python3 scripts/notion/page_reader.py resume`)` | ALWAYS |
-| Projects | `Notion (fetch via `python3 scripts/notion/page_reader.py projects`)` | ALWAYS (proof points, hero metrics) |
-| Project details | Fetch from Notion: `python3 scripts/notion/page_reader.py {roma\|sera\|mroma\|deep-research\|txt2sql}` | For STAR stories |
+| Resume | `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader resume`)` | ALWAYS |
+| Projects | `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader projects`)` | ALWAYS (proof points, hero metrics) |
+| Project details | Fetch from Notion: `python3 -m sarvesh_ai_notion_interface.page_reader {roma\|sera\|mroma\|deep-research\|txt2sql}` | For STAR stories |
 
 **RULE: NEVER modify profile files.** Read-only.
 **RULE: NEVER hardcode metrics.** Read from profile at evaluation time.
@@ -84,7 +84,7 @@ Role disqualified during pre-evaluation filtering. No full A-G evaluation perfor
 2. Register in Notion with score 0 and status "Discarded":
 
 ```bash
-python3 scripts/notion/db_applications.py update-eval \
+python3 -m sarvesh_ai_notion_interface.db_applications update-eval \
   --page-id "{{PAGE_ID}}" \
   --score 0 \
   --status "Discarded" \
@@ -145,7 +145,7 @@ After detecting, read user's profile for archetype-specific proof points.
 
 ### Block B — CV Match
 
-Read `Notion (fetch via `python3 scripts/notion/page_reader.py resume`)` and `Notion (fetch via `python3 scripts/notion/page_reader.py projects`)`. Map EACH JD requirement:
+Read `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader resume`)` and `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader projects`)`. Map EACH JD requirement:
 
 | JD Requirement | Profile Evidence | Fit |
 |---------------|-----------------|-----|
@@ -199,11 +199,11 @@ Map 5-6 stories to likely questions:
 
 Fetch detailed project context from Notion for rich STAR stories:
 ```bash
-python3 scripts/notion/page_reader.py roma          # Agent architecture, SOTA results
-python3 scripts/notion/page_reader.py sera          # Scaling agents, systematic experiments
-python3 scripts/notion/page_reader.py deep-research # Multi-agent systems, evaluation
-python3 scripts/notion/page_reader.py txt2sql       # Knowledge graphs, team leadership, patent
-python3 scripts/notion/page_reader.py mroma         # Cost optimization, multimodal design
+python3 -m sarvesh_ai_notion_interface.page_reader roma          # Agent architecture, SOTA results
+python3 -m sarvesh_ai_notion_interface.page_reader sera          # Scaling agents, systematic experiments
+python3 -m sarvesh_ai_notion_interface.page_reader deep-research # Multi-agent systems, evaluation
+python3 -m sarvesh_ai_notion_interface.page_reader txt2sql       # Knowledge graphs, team leadership, patent
+python3 -m sarvesh_ai_notion_interface.page_reader mroma         # Cost optimization, multimodal design
 ```
 
 **Reflection is critical** — it separates senior from junior candidates:
@@ -355,7 +355,7 @@ This prints one of: `Discarded`, `Referral`, or `Evaluated`. Capture the output 
 
 ```bash
 STATUS=$(python3 skills/job-eval/get_referrals.py resolve-status --score {score} --company "{company_name}")
-python3 scripts/notion/db_applications.py update-eval \
+python3 -m sarvesh_ai_notion_interface.db_applications update-eval \
   --page-id "{{PAGE_ID}}" \
   --score {score} \
   --status "$STATUS" \

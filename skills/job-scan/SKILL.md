@@ -7,6 +7,21 @@ description: Discover new job postings from ATS platforms — scans Greenhouse, 
 
 Discover new job postings by scanning ATS platforms (Greenhouse, Ashby, Lever) directly via their public APIs. Filters by title keywords, deduplicates against Notion, and adds new offers to Notion with status "Scanned" for evaluation.
 
+## Setup
+
+**Requirements**
+- Python 3.10+; Node.js for the `.mjs` liveness/extraction helpers
+- Install the Notion integration package:
+  ```bash
+  python -m pip install sarvesh-ai-notion-interface
+  ```
+- Notion access via environment variables or a `.env` file in your working directory:
+  - `NOTION_TOKEN` — Notion integration token (required)
+  - Database IDs as needed: `NOTION_DB_APPLICATIONS`, `NOTION_DB_COMPANIES`, `NOTION_DB_CONNECTIONS`
+  - Page IDs as needed: `NOTION_PAGE_PARENT`, `NOTION_PAGE_RESUME`, `NOTION_PAGE_PROJECTS`
+
+The Notion integration package (`sarvesh-ai-notion-interface`) is published on PyPI and contains all database helpers for job tracking.
+
 ## Codex Compatibility
 
 - "WebSearch" in older notes means Codex's web search capability.
@@ -86,7 +101,7 @@ Use WebSearch with `site:` filters to discover companies NOT yet in `tracked_com
 Loaded from the **Notion Preferences page**. Applied centrally in `dedup_liveness_upload.py` (not during collection). View current keywords:
 
 ```bash
-python3 scripts/notion/page_preferences.py --title-filter --pretty
+python3 -m sarvesh_ai_notion_interface.page_preferences --title-filter --pretty
 ```
 
 **Rule:** At least 1 positive keyword must match AND 0 negative keywords can match (case-insensitive).
@@ -114,9 +129,9 @@ Runs on ALL candidates in the pipeline (API + WebSearch + user input). The `dedu
 **Using the script:**
 
 ```bash
-node skills/job-scan/scripts/liveness_helpers/check-liveness.mjs URL1 URL2 URL3
+node scripts/liveness_helpers/check-liveness.mjs URL1 URL2 URL3
 # or from a file:
-node skills/job-scan/scripts/liveness_helpers/check-liveness.mjs --file urls.txt
+node scripts/liveness_helpers/check-liveness.mjs --file urls.txt
 ```
 
 **Classification logic (liveness_helpers/liveness-core.mjs):**
@@ -152,7 +167,7 @@ This is the standard pipeline that runs every time `/job-scan` is invoked. ALL s
 **Step 1:** Run API scan, writing to candidate store. **NEVER use `--hours 0`** — it disables the time filter entirely and floods the pipeline with stale jobs (some months old). The default 24h filter is correct for daily scans. For weekly scans, use `--hours 168`. For broader catch-up scans, use `--hours 720` (30 days) at most:
 
 ```bash
-python3 skills/job-scan/scripts/scout_specials.py
+python3 scripts/scout_specials.py
 ```
 
 **Step 1.5 (MANDATORY):** WebSearch fallback for companies without ATS APIs:
@@ -294,7 +309,7 @@ Jobright.ai is a job aggregator with AI-powered matching. If the user has a Jobr
 
 2. **Auto-refresh** the page to get the latest listings. Reload the current Jobright URL (for example `https://jobright.ai/jobs/recommend`), then wait for text such as `Recommended` or `APPLY` to ensure the page has fully loaded.
 
-   All extraction functions are in `skills/job-scan/scripts/jobright_helpers/extract-jobright.mjs`. Read the file and inject functions through the browser tool's script-evaluation feature.
+   All extraction functions are in `scripts/jobright_helpers/extract-jobright.mjs` (relative to this skill's directory). Read the file and inject functions through the browser tool's script-evaluation feature.
 
 3. **Scroll to load all jobs.** Call `evaluate_script` with the `scrollAndCount()` function from `extract-jobright.mjs`. Returns the total number of job cards loaded.
 
@@ -304,11 +319,11 @@ Jobright.ai is a job aggregator with AI-powered matching. If the user has a Jobr
 
    For any `greenhouse-embed:{token}` results, call `resolveGhEmbed(slug, token)` to resolve via the Greenhouse boards API. Derive slug from company name: lowercase, remove spaces/special chars (e.g., "Anduril Industries" → "andurilindustries").
 
-6. **Merge and save.** Combine extracted jobs with resolved URLs. Each job should have: `title`, `company`, `url` (real ATS URL or Jobright fallback), `location`. Save as `skills/job-scan/jobright_raw.json`.
+6. **Merge and save.** Combine extracted jobs with resolved URLs. Each job should have: `title`, `company`, `url` (real ATS URL or Jobright fallback), `location`. Save as `jobright_raw.json` in this skill's directory.
 
 7. **Run the processing script** to normalize and append to candidate store:
    ```bash
-   python3 skills/job-scan/scripts/resolve_jobright.py
+   python3 scripts/resolve_jobright.py
    ```
 
 8. Print the summary from the script output.
@@ -318,7 +333,7 @@ Jobright.ai is a job aggregator with AI-powered matching. If the user has a Jobr
 Load search queries from Notion by running:
 
 ```bash
-python3 scripts/notion/page_preferences.py --search-queries --pretty
+python3 -m sarvesh_ai_notion_interface.page_preferences --search-queries --pretty
 ```
 
 For each query:
@@ -349,10 +364,10 @@ Never instruct a subagent to write/edit/append to `candidate_store.json` directl
 
 Load manually added job URLs:
 ```bash
-python3 scripts/notion/page_preferences.py --user-input-jobs --pretty
+python3 -m sarvesh_ai_notion_interface.page_preferences --user-input-jobs --pretty
 ```
 
-For each URL listed, append to `skills/job-scan/candidate_store.json` with:
+For each URL listed, append to `candidate_store.json` (in this skill's directory) with:
 ```json
 {"company": "(extract from URL or page title)", "role": "(extract from page title)", "url": "...", "source": "user_input"}
 ```
@@ -362,7 +377,7 @@ This allows you to paste job URLs directly into the Notion Preferences page unde
 **Step 3 (MANDATORY):** Title filter, location enrichment, dedup, liveness check, and upload:
 
 ```bash
-python3 skills/job-scan/scripts/dedup_liveness_upload.py skills/job-scan/candidate_store.json
+python3 scripts/dedup_liveness_upload.py candidate_store.json
 ```
 
 This script runs six steps in sequence:
@@ -379,19 +394,19 @@ This script runs six steps in sequence:
 ### Scan a single company:
 
 ```bash
-python3 skills/job-scan/scripts/scout_specials.py --company anthropic
+python3 scripts/scout_specials.py --company anthropic
 ```
 
 ### Preview without writing:
 
 ```bash
-python3 skills/job-scan/scripts/scout_specials.py --dry-run
+python3 scripts/scout_specials.py --dry-run
 ```
 
 ### Check if specific URLs are still active:
 
 ```bash
-node skills/job-scan/scripts/liveness_helpers/check-liveness.mjs https://job-boards.greenhouse.io/company/jobs/123
+node scripts/liveness_helpers/check-liveness.mjs https://job-boards.greenhouse.io/company/jobs/123
 ```
 
 ## Output
@@ -455,7 +470,7 @@ skills/job-scan/
         ├── check-liveness.mjs      # Playwright URL liveness checker
         └── liveness-core.mjs       # Shared liveness classification logic
 
-scripts/notion/                     # Shared Notion scripts (at repo root)
+sarvesh_ai_notion_interface        # Notion integration (pip install sarvesh-ai-notion-interface)
 ├── config.py                       # Loads all IDs from .env
 ├── notion_client.py                # HTTP primitives
 ├── db_applications.py              # Applications DB (add, query, update, dedup)

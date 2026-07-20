@@ -21,21 +21,9 @@ import os
 import sys
 from datetime import date
 
-# Handle both package import and direct execution
-try:
-    from .notion_client import notion_request, load_all_rows
-    from .config import NOTION_TOKEN, NOTION_DB_APPLICATIONS
-    from .db_applications import markdown_to_notion_blocks, append_blocks_to_page
-except ImportError:
-    # When run directly, resolve paths relative to this file.
-    # Add both the notion scripts dir (for direct imports) and the repo root
-    # (so `from scripts.notion.x import ...` used by company_matcher resolves).
-    _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    sys.path.insert(0, os.path.join(_REPO_ROOT, "scripts", "notion"))
-    sys.path.insert(0, _REPO_ROOT)
-    from notion_client import notion_request, load_all_rows
-    from config import NOTION_TOKEN, NOTION_DB_APPLICATIONS
-    from db_applications import markdown_to_notion_blocks, append_blocks_to_page
+from sarvesh_ai_notion_interface.notion_client import notion_request, load_all_rows
+from sarvesh_ai_notion_interface.config import NOTION_TOKEN, NOTION_DB_APPLICATIONS
+from sarvesh_ai_notion_interface.db_applications import markdown_to_notion_blocks, append_blocks_to_page
 
 
 REACHOUT_STATUSES = ["Evaluated", "Almost Applied"]

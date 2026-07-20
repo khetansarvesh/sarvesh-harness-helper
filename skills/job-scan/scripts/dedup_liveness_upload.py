@@ -17,9 +17,8 @@ import sys
 import tempfile
 import argparse
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-from scripts.notion.db_applications import load_dedup_sets, add_scanned_jobs_batch
-from scripts.notion.page_preferences import build_title_filter
+from sarvesh_ai_notion_interface.db_applications import load_dedup_sets, add_scanned_jobs_batch
+from sarvesh_ai_notion_interface.page_preferences import build_title_filter
 
 # Import US location filter and location enrichment
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))

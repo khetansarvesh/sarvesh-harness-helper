@@ -7,6 +7,20 @@ description: Company-specific interview preparation — process intel, STAR+R st
 
 Generate a comprehensive, company-specific interview preparation guide. Researches the interview process, maps your experience to likely questions, and identifies gaps.
 
+## Setup
+
+**Requirements**
+- Python 3.10+
+- Install the Notion integration package:
+  ```bash
+  python -m pip install sarvesh-ai-notion-interface
+  ```
+- Notion access via environment variables or a `.env` file in your working directory:
+  - `NOTION_TOKEN` — Notion integration token (required)
+  - Page IDs as needed: `NOTION_PAGE_RESUME`, `NOTION_PAGE_PROJECTS`, `NOTION_PAGE_PARENT`
+
+The Notion integration package (`sarvesh-ai-notion-interface`) is published on PyPI and contains all database helpers for job tracking.
+
 ## When to Activate
 
 - User says "prepare me for an interview at [company]"
@@ -16,8 +30,8 @@ Generate a comprehensive, company-specific interview preparation guide. Research
 
 ## Prerequisites
 
-- `Notion (fetch via `python3 scripts/notion/page_reader.py resume`)` — work experience and skills
-- `Notion (fetch via `python3 scripts/notion/page_reader.py projects`)` — project summaries and answer snippets
+- `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader resume`)` — work experience and skills
+- `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader projects`)` — project summaries and answer snippets
 
 ## Non-Negotiables
 
@@ -32,7 +46,7 @@ Generate a comprehensive, company-specific interview preparation guide. Research
 
 ### Step 1: Gather Context
 
-1. Read `Notion (fetch via `python3 scripts/notion/page_reader.py resume`)` and `Notion (fetch via `python3 scripts/notion/page_reader.py projects`)`
+1. Read `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader resume`)` and `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader projects`)`
 2. If an evaluation report exists for this company/role, read it for archetype and gap analysis
 3. Ask the user for any additional context:
    - Which round is it? (phone screen, technical, behavioral, onsite, final)
@@ -136,11 +150,11 @@ For each likely question, map a story from the user's experience:
 Fetch detailed project context from Notion for rich STAR stories:
 
 ```bash
-python3 scripts/notion/page_reader.py roma          # Agent architecture, SOTA results
-python3 scripts/notion/page_reader.py sera          # Scaling agents, systematic experiments
-python3 scripts/notion/page_reader.py deep-research # Multi-agent systems, evaluation
-python3 scripts/notion/page_reader.py txt2sql       # Knowledge graphs, team leadership, patent
-python3 scripts/notion/page_reader.py mroma         # Cost optimization, multimodal design
+python3 -m sarvesh_ai_notion_interface.page_reader roma          # Agent architecture, SOTA results
+python3 -m sarvesh_ai_notion_interface.page_reader sera          # Scaling agents, systematic experiments
+python3 -m sarvesh_ai_notion_interface.page_reader deep-research # Multi-agent systems, evaluation
+python3 -m sarvesh_ai_notion_interface.page_reader txt2sql       # Knowledge graphs, team leadership, patent
+python3 -m sarvesh_ai_notion_interface.page_reader mroma         # Cost optimization, multimodal design
 ```
 
 **Reflection is critical.** It separates senior from junior candidates:

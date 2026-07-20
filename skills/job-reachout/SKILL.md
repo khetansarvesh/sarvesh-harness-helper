@@ -7,6 +7,21 @@ description: Research the team behind a job posting or LinkedIn hiring post, cla
 
 After a job application is submitted (or when the user shares a hiring LinkedIn post), a well-researched cold message to the right person raises response rates dramatically. This skill researches the team behind a specific job posting or LinkedIn post, classifies who you're messaging, identifies the best contact, and drafts a personalized email or LinkedIn DM that maps the user's actual work to the company's publicly stated thesis.
 
+## Setup
+
+**Requirements**
+- Python 3.10+
+- Install the Notion integration package:
+  ```bash
+  python -m pip install sarvesh-ai-notion-interface
+  ```
+- Notion access via environment variables or a `.env` file in your working directory:
+  - `NOTION_TOKEN` — Notion integration token (required)
+  - Database IDs as needed: `NOTION_DB_APPLICATIONS`, `NOTION_DB_COMPANIES`, `NOTION_DB_CONNECTIONS`
+  - Page IDs as needed: `NOTION_PAGE_PARENT`, `NOTION_PAGE_RESUME`, `NOTION_PAGE_PROJECTS`
+
+The Notion integration package (`sarvesh-ai-notion-interface`) is published on PyPI and contains all database helpers for job tracking.
+
 ## When to Activate
 
 - User says "find out who posted this job" or "who should I email about this role"
@@ -21,8 +36,8 @@ After a job application is submitted (or when the user shares a hiring LinkedIn 
 
 - **One of:** job posting URL, company + role name, or LinkedIn post URL(s) — required to identify the team (single-job / LinkedIn-post mode). In batch mode, URLs come from Notion.
 - **User's profile data** loaded fresh:
-  - `Notion (fetch via `python3 scripts/notion/page_reader.py resume`)` — experience, education, skills, projects
-  - `Notion (fetch via `python3 scripts/notion/page_reader.py projects`)` — detailed project descriptions for matching
+  - `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader resume`)` — experience, education, skills, projects
+  - `Notion (fetch via `python3 -m sarvesh_ai_notion_interface.page_reader projects`)` — detailed project descriptions for matching
 - Optional but high-value: the user has already applied (so the message is a signal-boost, not a substitute)
 - `NOTION_TOKEN` environment variable set — for fetching profile data; also required for Notion write in batch mode
 - **Notion write is optional** — if the user says "don't upload to Notion" / "just create a file", skip Phase 6 and write a local markdown file instead (see Phase 6.5)
@@ -58,7 +73,7 @@ The skill runs in three modes:
 **Step 0.1 — Query candidates:**
 
 ```bash
-python3 skills/job-reachout/scripts/reachout_writer.py query
+python3 scripts/reachout_writer.py query
 ```
 
 Returns JSON with all jobs in `Evaluated` or `Almost Applied` status, each flagged with `has_reachout: true/false`. The `has_reachout` flag is populated by fetching each page's blocks and checking for an existing `## Reachout` heading — this prevents duplicate writes on re-runs.
@@ -85,8 +100,8 @@ If a job has `url: null`, flag it and skip — the research phase needs a URL or
 **Step 0.4 — Load the user's profile ONCE:**
 
 ```bash
-python3 scripts/notion/page_reader.py resume
-python3 scripts/notion/page_reader.py projects
+python3 -m sarvesh_ai_notion_interface.page_reader resume
+python3 -m sarvesh_ai_notion_interface.page_reader projects
 ```
 
 The profile is the same for every job in the batch — load it once before the loop, not per-job.
@@ -220,9 +235,9 @@ Recent funding = company is actively hiring, founder is reachable, message timin
 **Step 3.1 — Load the user's projects:**
 
 ```bash
-python3 scripts/notion/page_reader.py projects
+python3 -m sarvesh_ai_notion_interface.page_reader projects
 # And for specific projects:
-python3 scripts/notion/page_reader.py {project_name}
+python3 -m sarvesh_ai_notion_interface.page_reader {project_name}
 ```
 
 **Step 3.2 — Build the mapping table:**
@@ -340,7 +355,7 @@ Once Phase 4.1 has named the person to message, resolve their email before draft
 **Otherwise run:**
 
 ```bash
-python3 skills/job-reachout/scripts/infer_email.py \
+python3 scripts/infer_email.py \
   --company "{Company Name}" \
   --name "{First Last}" \
   --json
@@ -490,7 +505,7 @@ Never: flattery, desperation, emoji, phone number, resume dump, multiple asks, b
 **Step 6.1 — Check for an existing Reachout section:**
 
 ```bash
-python3 skills/job-reachout/scripts/reachout_writer.py has-reachout --page-id {page_id}
+python3 scripts/reachout_writer.py has-reachout --page-id {page_id}
 ```
 
 Returns `{"has_reachout": true/false}`. If `true`, **skip** — do not overwrite. Re-runs produce a new dated section (the script always appends, never deletes), but within a single batch run you should skip to avoid duplicates.
@@ -545,7 +560,7 @@ Save to `/tmp/reachout_{page_id}.md`.
 **Step 6.3 — Write to Notion:**
 
 ```bash
-python3 skills/job-reachout/scripts/reachout_writer.py write --page-id {page_id} --report-file /tmp/reachout_{page_id}.md
+python3 scripts/reachout_writer.py write --page-id {page_id} --report-file /tmp/reachout_{page_id}.md
 ```
 
 This converts the markdown to Notion blocks (heading_3, bulleted lists, paragraphs) and appends them to the page. The script prepends a `## Reachout` heading_2 and a `*Drafted: YYYY-MM-DD*` date line.
@@ -751,11 +766,11 @@ When you know who to message (e.g. a CTO found via LinkedIn) but not their email
 
 ```bash
 # Show learned domain + pattern from referrals
-python3 skills/job-reachout/scripts/infer_email.py --company "Google"
+python3 scripts/infer_email.py --company "Google"
 
 # Infer candidates for the reachout target (always use --json in agent runs)
-python3 skills/job-reachout/scripts/infer_email.py --company "Prior Labs" --name "Jane Doe" --json
-python3 skills/job-reachout/scripts/infer_email.py --company "Kipo AI" --name "Alex Kim" --domain kipo.ai --json
+python3 scripts/infer_email.py --company "Prior Labs" --name "Jane Doe" --json
+python3 scripts/infer_email.py --company "Kipo AI" --name "Alex Kim" --domain kipo.ai --json
 ```
 
 Behavior:
@@ -772,7 +787,7 @@ Behavior:
 4. Never skip silently when the company exists in Companies DB — if inference returns empty, say "no referral work emails / no domain" and use LinkedIn
 5. Also surface warm Referral connections as alternate contacts when present
 
-The skill also uses the shared Notion scripts at `scripts/notion/`:
+The skill also uses the `sarvesh-ai-notion-interface` package (`pip install sarvesh-ai-notion-interface`):
 - `notion_client.py` — HTTP primitives (used by reachout_writer.py)
 - `db_applications.py` — `markdown_to_notion_blocks()` and `append_blocks_to_page()` (imported by reachout_writer.py)
 - `page_reader.py` — fetches resume/projects profile data
