@@ -36,7 +36,7 @@ Update later with `git pull`. The repo is the canonical source; every linked har
 | Claude Code | `claude` (default) | `~/.claude/` | agents, commands, rules, skills, hooks, mcp |
 | Cursor | `cursor` | `~/.cursor/` | agents, rules, skills, mcp |
 | Codex | `codex` | `~/.codex/` | rules, skills |
-| pi | `pi` | `~/.pi/agent/` | skills |
+| pi | `pi` | `~/.pi/agent/` | skills, agents¹ |
 
 Install to one target, several targets (`a,b`), or all of them:
 
@@ -47,6 +47,8 @@ node scripts/install.cjs --target all --with skills -y
 ```
 
 Components a target doesn't support are skipped with a note (e.g. `commands` on cursor, `agents` on codex).
+
+> ¹ **pi agents** require the [`pi-sub-agent`](https://pi.dev/packages/pi-sub-agent) extension (`pi install npm:pi-sub-agent`). pi has no native subagent support; `pi-sub-agent` reads `~/.pi/agent/agents/*.md`. Your Claude agent frontmatter is incompatible with pi (Capitalized tool names, model aliases, Claude-only fields), so `shh` generates pi-native agent files at install time — translating tool names (`Read`→`read`, `Glob`→`find`), dropping `model`/`color`/`permissionMode`/`mcpServers` — and symlinks those generated files into `~/.pi/agent/agents/`.
 
 ### Options
 

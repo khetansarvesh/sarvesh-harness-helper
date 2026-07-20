@@ -6,5 +6,6 @@ node_modules/
 logs/
 cron_*
 .pi-loop*
+.generated/
 skills/job-scan/candidate_store.json
 Khetan_Sarvesh_Resume.pdf

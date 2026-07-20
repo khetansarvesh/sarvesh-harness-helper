@@ -139,8 +139,13 @@ const TARGETS = {
     root: () => h('.pi/agent'),
     components: {
       skills: 'skills',
-      // pi commands/rules/agents are TypeScript extensions or unsupported as
-      // markdown. pi also reads ~/.agents/skills/ but we link the pi-native dir.
+      // pi has no native subagent support; the `pi-sub-agent` extension (or the
+      // built-in subagents in newer pi builds) reads ~/.pi/agent/agents/*.md.
+      // Claude agent frontmatter is incompatible (Capitalized tool names, model
+      // aliases like `opus`, Claude-only `color`/`permissionMode` fields), so we
+      // generate pi-native agent files at install time and symlink those.
+      // See `transformAgentForPi` below.
+      agents: 'agents',
     },
   },
 };
@@ -281,6 +286,132 @@ function packageName(sourceRoot) {
 }
 
 // ---------------------------------------------------------------------------
+// pi agent frontmatter transform
+// ---------------------------------------------------------------------------
+
+// Claude Code agent frontmatter is incompatible with pi-sub-agent:
+//   - tool names are Capitalized (Read, Grep, Glob, Bash, Edit, Write) and
+//     pi expects lowercase (read, grep, find, bash, edit, write)
+//   - `model` uses Claude aliases (opus/sonnet/haiku) that pi can't resolve
+//   - `color`, `permissionMode`, `mcpServers` are Claude-specific
+//
+// This rewrites an agent markdown file into a pi-native one: translates tool
+// names, drops the incompatible fields, keeps `name`/`description`/body.
+// Returns the transformed file content as a string.
+
+const CLAUDE_TO_PI_TOOLS = {
+  Read: 'read',
+  Grep: 'grep',
+  Glob: 'find',
+  Bash: 'bash',
+  Edit: 'edit',
+  Write: 'write',
+};
+
+// Fields to keep in the pi frontmatter; everything else is dropped.
+const PI_AGENT_KEEP_FIELDS = new Set(['name', 'description', 'tools']);
+
+function parseFrontmatterBlock(content) {
+  // Match leading ---\n...\n--- where the closing fence may be on its own
+  // line OR glued to the last value (e.g. `color: blue---` — some agents
+  // in the wild have no newline before the closing fence).
+  const m = content.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/);
+  if (m) return { frontmatter: m[1], body: content.slice(m[0].length) };
+  // Fallback: closing fence glued to last value (color: blue---\n)
+  const glued = content.match(/^---\s*\r?\n([\s\S]*?)([A-Za-z]+:.*?)(---\s*(?:\r?\n|$))/);
+  if (glued) {
+    const frontmatter = glued[2].includes('\n') ? glued[1] + glued[2] : glued[1] + '\n' + glued[2];
+    return { frontmatter, body: content.slice(glued[0].length) };
+  }
+  return { frontmatter: null, body: content };
+}
+
+function parseYamlishFrontmatter(raw) {
+  // Minimal parser for the flat key:value frontmatter these agents use.
+  // Handles: key: value, key: [a, b], key: "value", and simple block lists
+  // (key:\n  - item). We only need name/description/tools, so this is enough.
+  const result = {};
+  const lines = raw.split(/\r?\n/);
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const kv = line.match(/^([A-Za-z][\w-]*)\s*:\s*(.*)$/);
+    if (!kv) { i++; continue; }
+    const key = kv[1];
+    let value = kv[2].trim();
+    if (value === '') {
+      // block list: collect following  - item lines
+      const items = [];
+      i++;
+      while (i < lines.length && /^\s+-\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s+-\s+/, '').trim().replace(/^['"]|['"]$/g, ''));
+        i++;
+      }
+      result[key] = items;
+      continue;
+    }
+    // inline array ["a", "b"] or comma list a, b, c
+    if (value.startsWith('[') && value.endsWith(']')) {
+      result[key] = value.slice(1, -1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
+    } else {
+      result[key] = value.replace(/^['"]|['"]$/g, '');
+    }
+    i++;
+  }
+  return result;
+}
+
+function transformAgentForPi(content) {
+  const { frontmatter, body } = parseFrontmatterBlock(content);
+  if (!frontmatter) return content; // no frontmatter, pass through
+
+  const fm = parseYamlishFrontmatter(frontmatter);
+
+  // Translate tools
+  let toolsLine = '';
+  const rawTools = Array.isArray(fm.tools) ? fm.tools : (typeof fm.tools === 'string' ? fm.tools.split(',') : []);
+  const piTools = rawTools.map(t => t.trim()).filter(Boolean).map(t => CLAUDE_TO_PI_TOOLS[t] || t.toLowerCase());
+  if (piTools.length > 0) toolsLine = `tools: ${piTools.join(', ')}`;
+
+  // Rebuild frontmatter keeping only name/description/tools
+  const lines = ['---'];
+  if (fm.name) lines.push(`name: ${fm.name}`);
+  if (fm.description) lines.push(`description: ${fm.description}`);
+  if (toolsLine) lines.push(toolsLine);
+  lines.push('---');
+
+  return lines.join('\n') + '\n' + body;
+}
+
+// Directory where generated pi agents are written (inside the package so the
+// path is stable for symlinking).
+function piAgentsGeneratedDir(sourceRoot) {
+  return path.join(sourceRoot, '.generated', 'pi-agents');
+}
+
+// Generate pi-native agent files from <sourceRoot>/agents/*.md into
+// <sourceRoot>/.generated/pi-agents/*.md. Returns the generated directory path.
+// Idempotent: overwrites any existing generated files.
+function generatePiAgents(sourceRoot) {
+  const srcDir = path.join(sourceRoot, 'agents');
+  const outDir = piAgentsGeneratedDir(sourceRoot);
+  fs.rmSync(outDir, { recursive: true, force: true });
+  ensureDir(outDir);
+
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  let count = 0;
+  for (const e of entries) {
+    if (!e.isFile() || !e.name.endsWith('.md')) continue;
+    const src = path.join(srcDir, e.name);
+    const content = fs.readFileSync(src, 'utf8');
+    const transformed = transformAgentForPi(content);
+    fs.writeFileSync(path.join(outDir, e.name), transformed);
+    count++;
+  }
+  return { outDir, count };
+}
+
+// ---------------------------------------------------------------------------
 // Plan
 // ---------------------------------------------------------------------------
 
@@ -312,6 +443,19 @@ function buildPlanForTarget(targetId, adapter, components, sourceRoot) {
     if (!fs.existsSync(source)) {
       ops.push({ kind: 'skip', target: targetId, component: c.id, source, dest: null,
         note: 'source missing' });
+      continue;
+    }
+
+    // pi agents: Claude frontmatter is incompatible (Capitalized tools, model
+    // aliases, Claude-only fields). Generate pi-native files and link those.
+    if (targetId === 'pi' && c.id === 'agents') {
+      const { outDir } = generatePiAgents(sourceRoot);
+      const entries = fs.readdirSync(outDir, { withFileTypes: true });
+      for (const e of entries) {
+        if (!e.isFile() || !e.name.endsWith('.md')) continue;
+        ops.push({ kind: 'link', target: targetId, component: c.id,
+          source: path.join(outDir, e.name), dest: path.join(targetRoot, destSubpath, e.name) });
+      }
       continue;
     }
 
