@@ -1,20 +1,9 @@
-# User-Level CLAUDE.md Example
-
-This is an example user-level CLAUDE.md file. Place at `~/.claude/CLAUDE.md`.
-
-User-level configs apply globally across all projects. Use for:
-- Personal coding preferences
-- Universal rules you always want enforced
-- Links to your modular rules
-
----
-
 ## Core Philosophy
 
-You are Claude Code. I use specialized agents and skills for complex tasks.
+I use specialized agents and skills for complex tasks.
 
 **Key Principles:**
-1. **Agent-First**: Delegate to specialized agents for complex work
+1. **Agent-First**: Delegate to specialized agents for complex work.
 2. **Parallel Execution**: Use Task tool with multiple agents when possible
 3. **Plan Before Execute**: Use Plan Mode for complex operations
 4. **Test-Driven**: Write tests before implementation
@@ -24,7 +13,7 @@ You are Claude Code. I use specialized agents and skills for complex tasks.
 
 ## Modular Rules
 
-Detailed guidelines are in `~/.claude/rules/`:
+Detailed guidelines are in `rules/`:
 
 | Rule File | Contents |
 |-----------|----------|
@@ -37,25 +26,17 @@ Detailed guidelines are in `~/.claude/rules/`:
 | performance.md | Model selection, context management |
 | hooks.md | Hooks System |
 
----
 
-## Available Agents
+## General Guidelines
 
-Located in `~/.claude/agents/`:
-
-| Agent | Purpose |
-|-------|---------|
-| planner | Feature implementation planning |
-| architect | System design and architecture |
-| tdd-guide | Test-driven development |
-| code-reviewer | Code review for quality/security |
-| security-reviewer | Security vulnerability analysis |
-| build-error-resolver | Build error resolution |
-| e2e-runner | Playwright E2E testing |
-| refactor-cleaner | Dead code cleanup |
-| doc-updater | Documentation updates |
-
----
+- Never use the em dash "—".Use plain dash "-" instead.
+- When writing commit messages, NEVER auto-add your agent name as co-author.
+- Never manually modify CHANGELOG.md files or any files that are marked as auto-generated.
+- When writing or substantially editing long Markdown files, put each full sentence on its own line. Preserve normal Markdown structure, but avoid wrapping multiple sentences onto one physical line.
+- When making technical decisions, do not give much weight to development cost. Instead, prefer quality, simplicity, robustness, scalability, and long term maintainability.
+- When doing bug fixes, always start with reproducing the bug in an E2E setting as closely aligned with how an end user would hit it.This makes sure you find the real problem so your fix will actually solve it.
+- When end-to-end testing a product, be picky about the UI you see and be obsessed with pixel perfection.If something clearly looks off, even if it is not directly related to what you are doing, try to get it fixed along the way.
+- Apply that same high standard to engineering excellence: lint, test failures, and test flakiness.If you see one, even if it is not caused by what you are working on right now, still get it fixed.
 
 ## Personal Preferences
 
@@ -85,25 +66,4 @@ Located in `~/.claude/agents/`:
 - If the current task already produces the relevant docs, comments, or examples, do not duplicate the same knowledge elsewhere
 - If there is no obvious project doc location, ask before creating a new top-level doc
 
----
 
-## Editor Integration
-
-I use Zed as my primary editor:
-- Agent Panel for file tracking
-- CMD+Shift+R for command palette
-- Vim mode enabled
-
----
-
-## Success Metrics
-
-You are successful when:
-- All tests pass (80%+ coverage)
-- No security vulnerabilities
-- Code is readable and maintainable
-- User requirements are met
-
----
-
-**Philosophy**: Agent-first design, parallel execution, plan before action, test before code, security always.
