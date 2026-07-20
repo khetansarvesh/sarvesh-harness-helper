@@ -1,0 +1,80 @@
+name: Publish to npm
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+
+permissions:
+  id-token: write  # Required for npm Trusted Publishing (OIDC)
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    environment: main
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      # actions/setup-node writes an `_authToken=${NODE_AUTH_TOKEN}` line into
+      # .npmrc whenever registry-url is set. With Trusted Publishing there is no
+      # NODE_AUTH_TOKEN, and the empty token line can make `npm publish` skip the
+      # OIDC exchange and fail with ENEEDAUTH. Strip it so the npm CLI falls back
+      # to the OIDC flow. See actions/setup-node#1551.
+      - name: Remove placeholder auth token line (use OIDC)
+        run: |
+          npmrc="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
+          if [ -f "$npmrc" ]; then
+            sed -i '/_authToken/d' "$npmrc"
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check whether version changed
+        id: check-version
+        run: |
+          set -euo pipefail
+          local_version="$(node -p "require('./package.json').version")"
+          echo "Local version: ${local_version}"
+          published_version="$(npm view @sarveshkhetan/shh version 2>/dev/null || echo "")"
+          echo "Published version: ${published_version:-<none>}"
+          if [ -n "$published_version" ] && [ "$published_version" = "$local_version" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "version=${local_version}" >> "$GITHUB_OUTPUT"
+            echo "version ${local_version} already published, skipping"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "version=${local_version}" >> "$GITHUB_OUTPUT"
+            echo "version ${local_version} is new (published: ${published_version:-<none>}), will publish"
+          fi
+
+      - name: Publish to npm
+        if: steps.check-version.outputs.changed == 'true'
+        run: npm publish --provenance --access public
+
+      - name: Summary
+        if: always()
+        run: |
+          local_version="${{ steps.check-version.outputs.version }}"
+          if [ "${{ steps.check-version.outputs.changed }}" = "true" ]; then
+            echo "Published @sarveshkhetan/shh@${local_version} via Trusted Publishing (OIDC)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Skipped publish: @sarveshkhetan/shh@${local_version} is already on npm." >> "$GITHUB_STEP_SUMMARY"
+          fi
