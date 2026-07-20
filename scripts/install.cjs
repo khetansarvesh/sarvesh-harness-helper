@@ -14,7 +14,7 @@
  * components are skipped with a note.
  *
  * Usage:
- *   node scripts/install.cjs                            # claude, agents+commands+rules
+ *   node scripts/install.cjs                            # all harnesses, agents+commands+rules+skills
  *   node scripts/install.cjs --target cursor            # cursor only
  *   node scripts/install.cjs --target all               # every supported harness
  *   node scripts/install.cjs --with skills,hooks,mcp
@@ -72,7 +72,7 @@ const COMPONENTS = [
     source: 'skills',
     walk: true,
     extension: null,
-    defaultOn: false,
+    defaultOn: true,
     description: 'Portable skills (directories with SKILL.md).',
   },
   {
@@ -157,7 +157,7 @@ const TARGET_IDS = Object.keys(TARGETS);
 function parseArgs(argv) {
   const args = argv.slice(2);
   const opts = {
-    targets: ['claude'],
+    targets: [...TARGET_IDS],
     force: false,
     yes: false,
     help: false,
@@ -219,7 +219,7 @@ Usage:
   shh [options]                           # via 'npm install -g @sarveshkhetan/shh'
 
 Options:
-  --target <name>     Target harness: ${TARGET_IDS.join(', ')}, or 'all' (default: claude)
+  --target <name>     Target harness: ${TARGET_IDS.join(', ')}, or 'all' (default: all)
   --with <a,b,c>      Additionally include opt-in components: skills, hooks, mcp
   --without <a,b,c>   Exclude default components, e.g. --without rules
   --force             Overwrite existing files/links at the destination
@@ -238,9 +238,9 @@ Targets (and the components each supports):
 ${tgtList}
 
 Examples:
-  node scripts/install.cjs                              # claude: agents+commands+rules
-  node scripts/install.cjs --target cursor --with skills
-  node scripts/install.cjs --target all --with skills -y
+  node scripts/install.cjs                              # all harnesses: agents+commands+rules+skills
+  node scripts/install.cjs --target cursor              # cursor only
+  node scripts/install.cjs --without skills             # exclude skills
   node scripts/install.cjs --without rules --force
 `;
 }
