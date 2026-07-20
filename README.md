@@ -20,6 +20,20 @@ npx skills add khetansarvesh/ai_skills_repo@python-patterns -g -a cursor -y
 npx skills add khetansarvesh/ai_skills_repo --skill '*' -a claude-code
 ```
 
+### Install for all agents
+
+Target every detected agent with `-a '*'`. Use `-g` for a global (user-level) install and `-y` to skip prompts.
+
+```bash
+# One skill for ALL agents (globally)
+npx skills add khetansarvesh/ai_skills_repo@python-patterns -a '*' -g -y
+
+# ALL skills for ALL agents (globally)
+npx skills add khetansarvesh/ai_skills_repo --all -g
+```
+
+`--all` is shorthand for `--skill '*' --agent '*' -y`. Note that `--skill '*'` alone selects every skill but not every agent; pair it with `-a '*'` (or use `--all`) to cover all agents. By default the CLI symlinks each agent to one canonical copy; add `--copy` if you need independent copies per agent.
+
 `npx skills` installs skills into the selected agent's project or global skill directory. It does not install the repository's Claude-specific agents, commands, rules, or application scripts.
 
 ### Compatibility
