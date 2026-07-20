@@ -1,6 +1,6 @@
 {
   "name": "@sarveshkhetan/shh",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Sarvesh's harness helper — agents, commands, rules, skills, hooks, and mcp config for Claude Code, Cursor, Codex, and pi. Symlinked from a single source.",
   "repository": {
     "type": "git",
@@ -22,8 +22,7 @@
     "liveness": "node skills/job-scan/scripts/liveness_helpers/check-liveness.mjs",
     "notion-eval": "python3 -m sarvesh_ai_notion_interface.db_applications update-eval",
     "notion-status": "python3 -m sarvesh_ai_notion_interface.db_applications update-status",
-    "notion-project": "python3 -m sarvesh_ai_notion_interface.page_reader",
-    "install": "node scripts/install.cjs"
+    "notion-project": "python3 -m sarvesh_ai_notion_interface.page_reader"
   },
   "bin": {
     "shh": "scripts/install.cjs"
