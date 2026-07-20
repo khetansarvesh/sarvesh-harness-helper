@@ -57,10 +57,10 @@ Update later with `git pull` then `npm run install` (or `shh --target all --with
 
 | Target | `--target` | Global path | Components supported |
 | --- | --- | --- | --- |
-| Claude Code | `claude` (default) | `~/.claude/` | agents, commands, rules, skills, hooks, mcp |
+| Claude Code | `claude` (default) | `~/.claude/` | agents, commands, rules, skills, hooks, mcp, uclaude |
 | Cursor | `cursor` | `~/.cursor/` | agents, rules, skills, mcp |
-| Codex | `codex` | `~/.codex/` | rules, skills |
-| pi | `pi` | `~/.pi/agent/` | skills, agents¹ |
+| Codex | `codex` | `~/.codex/` | rules, skills, uclaude |
+| pi | `pi` | `~/.pi/agent/` | skills, agents¹, uclaude |
 
 Install to one target, several targets (`a,b`), or all of them:
 
@@ -100,6 +100,7 @@ pi has no native subagent support. The [`pi-sub-agent`](https://pi.dev/packages/
 - `skills/`  → `<target>/skills/`  (`--with skills`; each `SKILL.md` dir linked; all targets)
 - `hooks.json` → `~/.claude/hooks.json` (`--with hooks`; claude only)
 - `mcp-servers.json` → `~/.claude/mcp-servers.json` (claude) / `~/.cursor/mcp.json` (cursor) (`--with mcp`)
+- `user-CLAUDE_AGENT.md` → `~/.claude/CLAUDE.md` (claude) / `~/.codex/AGENTS.md` (codex) / `~/.pi/agent/AGENTS.md` (pi) (default on; renamed to each harness's native user-memory filename; cursor has no on-disk global user-memory file, so skipped there)
 
 ¹ pi agents are auto-generated from `agents/*.md` with pi-native frontmatter (see [pi agents](#pi-agents)).
 

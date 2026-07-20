@@ -89,6 +89,18 @@ const COMPONENTS = [
     defaultOn: false,
     description: 'MCP server catalog (mcp-servers.json).',
   },
+  // Root-level user-memory file. The source filename is Claude-flavored
+  // (`user-CLAUDE_AGENT.md`) but each target renames it to that harness's
+  // native user-instructions filename (CLAUDE.md / AGENTS.md) via the target
+  // adapter's component map — same per-target rename pattern hooks/mcp use.
+  // defaultOn because this is core user instructions, parallel to agents/rules.
+  {
+    id: 'uclaude',
+    source: 'user-CLAUDE_AGENT.md',
+    walk: false,
+    defaultOn: true,
+    description: 'User-level agent instructions (user-CLAUDE_AGENT.md → CLAUDE.md / AGENTS.md).',
+  },
 ];
 
 const COMPONENT_BY_ID = new Map(COMPONENTS.map(c => [c.id, c]));
@@ -114,6 +126,8 @@ const TARGETS = {
       skills: 'skills',
       hooks: 'hooks.json',
       mcp: 'mcp-servers.json',
+      // Claude Code user memory lives at ~/.claude/CLAUDE.md.
+      uclaude: 'CLAUDE.md',
     },
   },
   cursor: {
@@ -122,7 +136,9 @@ const TARGETS = {
       agents: 'agents',
       rules: 'rules',
       skills: 'skills',
-      // cursor has no slash-commands and no hooks; its mcp file is mcp.json
+      // cursor has no slash-commands and no hooks; its mcp file is mcp.json.
+      // cursor also has no on-disk global user-memory file (User Rules live in
+      // the app via Customize → Rules), so uclaude is intentionally omitted.
       mcp: 'mcp.json',
     },
   },
@@ -133,6 +149,8 @@ const TARGETS = {
       skills: 'skills',
       // codex has no markdown subagents, no slash commands, no hooks.
       // its mcp config is config.toml (TOML, not JSON) — not linkable here.
+      // Codex global user guidance lives at ~/.codex/AGENTS.md.
+      uclaude: 'AGENTS.md',
     },
   },
   pi: {
@@ -146,6 +164,9 @@ const TARGETS = {
       // generate pi-native agent files at install time and symlink those.
       // See `transformAgentForPi` below.
       agents: 'agents',
+      // pi loads AGENTS.md (or CLAUDE.md) at startup; ~/.pi/agent/AGENTS.md is
+      // the documented global-instructions location.
+      uclaude: 'AGENTS.md',
     },
   },
 };
