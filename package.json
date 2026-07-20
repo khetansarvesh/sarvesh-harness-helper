@@ -13,8 +13,28 @@
     "liveness": "node skills/job-scan/scripts/liveness_helpers/check-liveness.mjs",
     "notion-eval": "python3 -m sarvesh_ai_notion_interface.db_applications update-eval",
     "notion-status": "python3 -m sarvesh_ai_notion_interface.db_applications update-status",
-    "notion-project": "python3 -m sarvesh_ai_notion_interface.page_reader"
+    "notion-project": "python3 -m sarvesh_ai_notion_interface.page_reader",
+    "install": "node scripts/install.cjs",
+    "install:dry": "node scripts/install.cjs --dry-run",
+    "prepublishOnly": "node scripts/install.cjs --dry-run -y"
   },
+  "bin": {
+    "ai-skills-install": "scripts/install.cjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "agents/",
+    "commands/",
+    "rules/",
+    "skills/",
+    "hooks.json",
+    "mcp-servers.json",
+    "scripts/install.cjs",
+    "AGENTS.md",
+    "README.md"
+  ],
   "dependencies": {
     "js-yaml": "^4.1.1",
     "playwright": "^1.58.1"

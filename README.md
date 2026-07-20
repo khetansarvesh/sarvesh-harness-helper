@@ -34,12 +34,57 @@ npx skills add khetansarvesh/ai_skills_repo --all -g
 
 `--all` is shorthand for `--skill '*' --agent '*' -y`. Note that `--skill '*'` alone selects every skill but not every agent; pair it with `-a '*'` (or use `--all`) to cover all agents. By default the CLI symlinks each agent to one canonical copy; add `--copy` if you need independent copies per agent.
 
-`npx skills` installs skills into the selected agent's project or global skill directory. It does not install the repository's Claude-specific agents, commands, rules, or application scripts.
+`npx skills` installs skills into the selected agent's project or global skill directory. It does not install the repository's Claude-specific agents, commands, rules, or application scripts — for those, use the installer below.
+
+## Install agents, commands, and rules (Claude Code)
+
+The repo ships its own installer (`scripts/install.cjs`, exposed as the `ai-skills-install` bin) that symlinks [`agents/`](./agents/), [`commands/`](./commands/), and [`rules/`](./rules/) into `~/.claude/` so there is a single source of truth — edit the repo and every linked harness sees the change instantly. Install is **always global and always symlink-based**.
+
+### From a clone (recommended for you)
+
+```bash
+git clone https://github.com/khetansarvesh/ai_skills_repo
+cd ai_skills_repo
+npm run install          # ~/.claude/
+```
+
+### From npm (no clone required)
+
+```bash
+npx ai-skills-install            # ~/.claude/
+```
+
+### Options
+
+| Flag | Description |
+| --- | --- |
+| `--with skills,hooks,mcp` | Additionally include opt-in components |
+| `--without rules` | Exclude a default component |
+| `--force` | Overwrite existing files/links at the destination |
+| `--dry-run` | Preview the plan without changing anything |
+| `-y, --yes` | Skip the confirmation prompt |
+
+Preview the plan first:
+
+```bash
+node scripts/install.cjs --dry-run -y
+```
+
+### What gets installed
+
+- `agents/`  → `~/.claude/agents/`  (default on)
+- `commands/` → `~/.claude/commands/` (default on)
+- `rules/`   → `~/.claude/rules/`   (default on, preserves language subdirs)
+- `skills/`  → `~/.claude/skills/`  (`--with skills`; each `SKILL.md` dir linked)
+- `hooks.json` → `~/.claude/hooks.json` (`--with hooks`)
+- `mcp-servers.json` → `~/.claude/mcp-servers.json` (`--with mcp`)
+
+> **Cursor / Codex / pi targets** are planned behind `--target`; today only `claude` is supported.
 
 ### Compatibility
 
 - **Portable skills:** directories under [`skills/`](./skills/) containing `SKILL.md`; these are the supported public installation surface.
-- **Claude Code integrations:** [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), and supporting scripts remain separately documented for users who need the full Claude Code setup.
+- **Claude Code integrations:** [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), [`hooks.json`](./hooks.json), and [`mcp-servers.json`](./mcp-servers.json) are installed by the repo's own installer (`npx ai-skills-install` or `npm run install` from a clone), which symlinks them into `~/.claude/`.
 - **Executable tools:** a future skill that wraps its own command-line tool may follow the separate AXI pattern—publish an npm package and have its skill invoke `npx -y <package>`. This repository's markdown workflow skills do not require a custom npm installer.
 
 ## Contributing skills
