@@ -4,6 +4,9 @@
   "description": "AI skills and automation tools",
   "type": "module",
   "scripts": {
+    "test:skills": "node --test scripts/ci/validate-skills.test.js",
+    "validate:skills": "node scripts/ci/validate-skills.js",
+    "verify:skills": "npm run test:skills && npm run validate:skills",
     "scan": "python3 skills/job-scan/scripts/scout_specials.py",
     "scan:dry-run": "python3 skills/job-scan/scripts/scout_specials.py --dry-run",
     "scan:company": "python3 skills/job-scan/scripts/scout_specials.py --company",

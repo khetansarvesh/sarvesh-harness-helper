@@ -1,0 +1,31 @@
+name: Validate public skills
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**'
+      - 'scripts/ci/**'
+      - 'package.json'
+  push:
+    branches:
+      - main
+    paths:
+      - 'skills/**'
+      - 'scripts/ci/**'
+      - 'package.json'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate frontmatter contract
+        run: npm run verify:skills
+      - name: Confirm Skills CLI discovers the catalog
+        run: npx --yes skills add . --list

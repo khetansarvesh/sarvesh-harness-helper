@@ -1,3 +1,51 @@
+# AI Skills Repository
+
+A public library of reusable agent skills. Install only the skills you need with the open-source [Vercel Skills CLI](https://skills.sh/); cloning this repository is not required.
+
+## Install skills
+
+The repository exposes its portable skills from [`skills/`](./skills/). Install from GitHub:
+
+```bash
+# Preview the catalog
+npx skills add khetansarvesh/ai_skills_repo --list
+
+# Install one skill for the current project
+npx skills add khetansarvesh/ai_skills_repo@python-patterns
+
+# Install one skill globally for Cursor without prompts
+npx skills add khetansarvesh/ai_skills_repo@python-patterns -g -a cursor -y
+
+# Install all skills for Claude Code
+npx skills add khetansarvesh/ai_skills_repo --skill '*' -a claude-code
+```
+
+`npx skills` installs skills into the selected agent's project or global skill directory. It does not install the repository's Claude-specific agents, commands, rules, or application scripts.
+
+### Compatibility
+
+- **Portable skills:** directories under [`skills/`](./skills/) containing `SKILL.md`; these are the supported public installation surface.
+- **Claude Code integrations:** [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), and supporting scripts remain separately documented for users who need the full Claude Code setup.
+- **Executable tools:** a future skill that wraps its own command-line tool may follow the separate AXI pattern—publish an npm package and have its skill invoke `npx -y <package>`. This repository's markdown workflow skills do not require a custom npm installer.
+
+## Contributing skills
+
+Each public skill must live at `skills/<kebab-case-name>/SKILL.md` and begin with YAML frontmatter containing a matching `name` and a non-empty `description`.
+
+```yaml
+---
+name: example-skill
+description: Explain what the skill does and when an agent should use it.
+---
+```
+
+Before opening a pull request, run:
+
+```bash
+npm run verify:skills
+npx skills add . --list
+```
+
 ## 📦 What's Inside
 
 This repo is a **Claude Code plugin** - install it directly or copy components manually.
