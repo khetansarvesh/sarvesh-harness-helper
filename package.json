@@ -1,6 +1,6 @@
 {
   "name": "@sarveshkhetan/shh",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Sarvesh's harness helper — agents, commands, rules, skills, hooks, and mcp config for Claude Code, Cursor, Codex, and pi. Symlinked from a single source.",
   "repository": {
     "type": "git",
