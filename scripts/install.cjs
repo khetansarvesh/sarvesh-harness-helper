@@ -2,7 +2,8 @@
 /**
  * @sarveshkhetan/shh installer — multi-target agent harness installer.
  *
- * Symlinks agents/, commands/, rules/, skills/, hooks, and mcp config from
+ * Symlinks agents/, commands/, rules/, skills/, hooks, mcp config, and the
+ * root-level user-memory file (user-CLAUDE_AGENT.md, renamed per target) from
  * this repository's canonical source directory into each supported agent
  * harness's global config directory. Always global, always symlink-based.
  *
