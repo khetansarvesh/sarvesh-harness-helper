@@ -37,6 +37,7 @@
     "skills/",
     "hooks.json",
     "mcp-servers.json",
+    "user-CLAUDE_AGENT.md",
     "scripts/install.cjs",
     "README.md"
   ],
