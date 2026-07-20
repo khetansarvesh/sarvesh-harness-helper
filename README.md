@@ -1,90 +1,78 @@
 # AI Skills Repository
 
-A public library of reusable agent skills. Install only the skills you need with the open-source [Vercel Skills CLI](https://skills.sh/); cloning this repository is not required.
+A public library of reusable agent skills, subagents, commands, and rules. Install everything with one command via npm — no clone required.
 
-## Install skills
+## Install
 
-The repository exposes its portable skills from [`skills/`](./skills/). Install from GitHub:
+The repo ships its own installer (`scripts/install.cjs`, exposed as the `ai-skills-install` bin) that symlinks [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), and optionally [`skills/`](./skills/), hooks, and mcp config into each supported agent harness's global config directory so there is a single source of truth — edit the repo and every linked harness sees the change instantly. Install is **always global and always symlink-based**.
 
-```bash
-# Preview the catalog
-npx skills add khetansarvesh/ai_skills_repo --list
+Because it symlinks rather than copies, the package must live at a **stable path**. There are two stable install methods:
 
-# Install one skill for the current project
-npx skills add khetansarvesh/ai_skills_repo@python-patterns
-
-# Install one skill globally for Cursor without prompts
-npx skills add khetansarvesh/ai_skills_repo@python-patterns -g -a cursor -y
-
-# Install all skills for Claude Code
-npx skills add khetansarvesh/ai_skills_repo --skill '*' -a claude-code
-```
-
-### Install for all agents
-
-Target every detected agent with `-a '*'`. Use `-g` for a global (user-level) install and `-y` to skip prompts.
+### From npm (no clone required) — for end users
 
 ```bash
-# One skill for ALL agents (globally)
-npx skills add khetansarvesh/ai_skills_repo@python-patterns -a '*' -g -y
-
-# ALL skills for ALL agents (globally)
-npx skills add khetansarvesh/ai_skills_repo --all -g
+npm install -g ai-skills-repo          # stable global install
+ai-skills-install                      # claude: agents+commands+rules → ~/.claude/
 ```
 
-`--all` is shorthand for `--skill '*' --agent '*' -y`. Note that `--skill '*'` alone selects every skill but not every agent; pair it with `-a '*'` (or use `--all`) to cover all agents. By default the CLI symlinks each agent to one canonical copy; add `--copy` if you need independent copies per agent.
+Update later with `npm update -g ai-skills-repo`. Uninstall with `npm uninstall -g ai-skills-repo`.
 
-`npx skills` installs skills into the selected agent's project or global skill directory. It does not install the repository's Claude-specific agents, commands, rules, or application scripts — for those, use the installer below.
+> **Don't use `npx ai-skills-install`.** npx downloads to an ephemeral cache that gets cleaned periodically; symlinks pointing there will dangle. The installer detects this and refuses unless you pass `--i-understand-the-cache-is-ephemeral`. Use `npm install -g` for a stable install.
 
-## Install agents, commands, and rules (Claude Code)
-
-The repo ships its own installer (`scripts/install.cjs`, exposed as the `ai-skills-install` bin) that symlinks [`agents/`](./agents/), [`commands/`](./commands/), and [`rules/`](./rules/) into `~/.claude/` so there is a single source of truth — edit the repo and every linked harness sees the change instantly. Install is **always global and always symlink-based**.
-
-### From a clone (recommended for you)
+### From a clone — for you (the author) or contributors
 
 ```bash
 git clone https://github.com/khetansarvesh/ai_skills_repo
 cd ai_skills_repo
-npm run install          # ~/.claude/
+npm run install                         # claude: agents+commands+rules → ~/.claude/
 ```
 
-### From npm (no clone required)
+Update later with `git pull`. The repo is the canonical source; every linked harness reads from it directly.
+
+### Targets
+
+| Target | `--target` | Global path | Components supported |
+| --- | --- | --- | --- |
+| Claude Code | `claude` (default) | `~/.claude/` | agents, commands, rules, skills, hooks, mcp |
+| Cursor | `cursor` | `~/.cursor/` | agents, rules, skills, mcp |
+| Codex | `codex` | `~/.codex/` | rules, skills |
+| pi | `pi` | `~/.pi/agent/` | skills |
+
+Install to one target, several targets (`a,b`), or all of them:
 
 ```bash
-npx ai-skills-install            # ~/.claude/
+node scripts/install.cjs --target cursor --with skills
+node scripts/install.cjs --target cursor,codex --with skills -y
+node scripts/install.cjs --target all --with skills -y
 ```
+
+Components a target doesn't support are skipped with a note (e.g. `commands` on cursor, `agents` on codex).
 
 ### Options
 
 | Flag | Description |
 | --- | --- |
+| `--target <name>` | Target harness: `claude`, `cursor`, `codex`, `pi`, `a,b` list, or `all` (default: `claude`) |
 | `--with skills,hooks,mcp` | Additionally include opt-in components |
 | `--without rules` | Exclude a default component |
 | `--force` | Overwrite existing files/links at the destination |
-| `--dry-run` | Preview the plan without changing anything |
 | `-y, --yes` | Skip the confirmation prompt |
-
-Preview the plan first:
-
-```bash
-node scripts/install.cjs --dry-run -y
-```
 
 ### What gets installed
 
-- `agents/`  → `~/.claude/agents/`  (default on)
-- `commands/` → `~/.claude/commands/` (default on)
-- `rules/`   → `~/.claude/rules/`   (default on, preserves language subdirs)
-- `skills/`  → `~/.claude/skills/`  (`--with skills`; each `SKILL.md` dir linked)
-- `hooks.json` → `~/.claude/hooks.json` (`--with hooks`)
-- `mcp-servers.json` → `~/.claude/mcp-servers.json` (`--with mcp`)
+- `agents/`  → `<target>/agents/`  (default on; claude, cursor)
+- `commands/` → `<target>/commands/` (default on; claude only)
+- `rules/`   → `<target>/rules/`   (default on; claude, cursor, codex; preserves language subdirs)
+- `skills/`  → `<target>/skills/`  (`--with skills`; each `SKILL.md` dir linked; all targets)
+- `hooks.json` → `~/.claude/hooks.json` (`--with hooks`; claude only)
+- `mcp-servers.json` → `~/.claude/mcp-servers.json` (claude) / `~/.cursor/mcp.json` (cursor) (`--with mcp`)
 
-> **Cursor / Codex / pi targets** are planned behind `--target`; today only `claude` is supported.
+> **Adding a new harness:** add an entry to the `TARGETS` registry in `scripts/install.cjs` with its root path and supported component map.
 
 ### Compatibility
 
 - **Portable skills:** directories under [`skills/`](./skills/) containing `SKILL.md`; these are the supported public installation surface.
-- **Claude Code integrations:** [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), [`hooks.json`](./hooks.json), and [`mcp-servers.json`](./mcp-servers.json) are installed by the repo's own installer (`npx ai-skills-install` or `npm run install` from a clone), which symlinks them into `~/.claude/`.
+- **Claude Code integrations:** [`agents/`](./agents/), [`commands/`](./commands/), [`rules/`](./rules/), [`hooks.json`](./hooks.json), and [`mcp-servers.json`](./mcp-servers.json) are installed by the repo's own installer (`npm install -g ai-skills-repo` + `ai-skills-install`, or `npm run install` from a clone), which symlinks them into the target harness's global config directory.
 - **Executable tools:** a future skill that wraps its own command-line tool may follow the separate AXI pattern—publish an npm package and have its skill invoke `npx -y <package>`. This repository's markdown workflow skills do not require a custom npm installer.
 
 ## Contributing skills
@@ -102,7 +90,6 @@ Before opening a pull request, run:
 
 ```bash
 npm run verify:skills
-npx skills add . --list
 ```
 
 ## 📦 What's Inside

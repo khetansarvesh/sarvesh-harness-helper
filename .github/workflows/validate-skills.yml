@@ -27,5 +27,3 @@ jobs:
           node-version: 20
       - name: Validate frontmatter contract
         run: npm run verify:skills
-      - name: Confirm Skills CLI discovers the catalog
-        run: npx --yes skills add . --list

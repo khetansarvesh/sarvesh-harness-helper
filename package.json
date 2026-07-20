@@ -14,9 +14,7 @@
     "notion-eval": "python3 -m sarvesh_ai_notion_interface.db_applications update-eval",
     "notion-status": "python3 -m sarvesh_ai_notion_interface.db_applications update-status",
     "notion-project": "python3 -m sarvesh_ai_notion_interface.page_reader",
-    "install": "node scripts/install.cjs",
-    "install:dry": "node scripts/install.cjs --dry-run",
-    "prepublishOnly": "node scripts/install.cjs --dry-run -y"
+    "install": "node scripts/install.cjs"
   },
   "bin": {
     "ai-skills-install": "scripts/install.cjs"
