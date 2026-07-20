@@ -10,12 +10,36 @@ Because it symlinks rather than copies, the package must live at a **stable path
 
 ### From npm (no clone required) — for end users
 
+**New install:**
+
 ```bash
 npm install -g @sarveshkhetan/shh        # stable global install
-shh                                    # claude: agents+commands+rules → ~/.claude/
+shh --target all --with skills -y      # all harnesses: agents+commands+rules+skills → ~/.claude/, ~/.cursor/, ~/.codex/, ~/.pi/agent/
 ```
 
-Update later with `npm update -g @sarveshkhetan/shh`. Uninstall with `npm uninstall -g @sarveshkhetan/shh`.
+Or install to a single target:
+
+```bash
+shh                                    # claude only: agents+commands+rules → ~/.claude/
+shh --target cursor --with skills -y   # cursor: agents+rules+skills → ~/.cursor/
+```
+
+> **pi agents prerequisite:** pi has no native subagent support. Install the [`pi-sub-agent`](https://pi.dev/packages/pi-sub-agent) extension first (`pi install npm:pi-sub-agent`), then `shh --target pi` will generate and symlink pi-native agent files automatically (see [pi agents](#pi-agents) below).
+
+**Update to a new version:**
+
+```bash
+npm update -g @sarveshkhetan/shh        # replaces package contents at the global path
+shh --target all --with skills -y      # regenerates pi agents + creates any new symlinks
+```
+
+`npm update` replaces the package files in place — existing symlinks for claude/cursor/codex automatically see the new content. Re-running `shh` is needed to regenerate pi agent files (the `.generated/` dir is wiped by `npm update`) and to create symlinks for any newly-added agents/commands/rules/skills. No `--force` needed unless you have conflicting files at the destinations.
+
+**Uninstall:**
+
+```bash
+npm uninstall -g @sarveshkhetan/shh     # removes the global package (symlinks will dangle; remove them manually)
+```
 
 > **Don't use `npx @sarveshkhetan/shh`.** npx downloads to an ephemeral cache that gets cleaned periodically; symlinks pointing there will dangle. The installer detects this and refuses unless you pass `--i-understand-the-cache-is-ephemeral`. Use `npm install -g` for a stable install.
 
@@ -27,7 +51,7 @@ cd sarvesh-harness-helper
 npm run install                         # claude: agents+commands+rules → ~/.claude/
 ```
 
-Update later with `git pull`. The repo is the canonical source; every linked harness reads from it directly.
+Update later with `git pull` then `npm run install` (or `shh --target all --with skills -y`). The repo is the canonical source; every linked harness reads from it directly.
 
 ### Targets
 
@@ -48,7 +72,15 @@ node scripts/install.cjs --target all --with skills -y
 
 Components a target doesn't support are skipped with a note (e.g. `commands` on cursor, `agents` on codex).
 
-> ¹ **pi agents** require the [`pi-sub-agent`](https://pi.dev/packages/pi-sub-agent) extension (`pi install npm:pi-sub-agent`). pi has no native subagent support; `pi-sub-agent` reads `~/.pi/agent/agents/*.md`. Your Claude agent frontmatter is incompatible with pi (Capitalized tool names, model aliases, Claude-only fields), so `shh` generates pi-native agent files at install time — translating tool names (`Read`→`read`, `Glob`→`find`), dropping `model`/`color`/`permissionMode`/`mcpServers` — and symlinks those generated files into `~/.pi/agent/agents/`.
+### pi agents
+
+pi has no native subagent support. The [`pi-sub-agent`](https://pi.dev/packages/pi-sub-agent) extension (`pi install npm:pi-sub-agent`) reads `~/.pi/agent/agents/*.md` — but Claude Code agent frontmatter is incompatible with pi:
+
+- Tool names are Capitalized (`Read`, `Grep`, `Glob`, `Bash`) and pi expects lowercase (`read`, `grep`, `find`, `bash`)
+- `model` uses Claude aliases (`opus`/`sonnet`/`haiku`) that pi can't resolve
+- `color`, `permissionMode`, `mcpServers` are Claude-specific fields
+
+`shh` handles this automatically: when installing to the `pi` target, it generates pi-native agent files at install time — translating tool names (`Read`→`read`, `Glob`→`find`), dropping incompatible fields (`model`/`color`/`permissionMode`/`mcpServers`) — and symlinks those generated files into `~/.pi/agent/agents/`. No separate command needed; it happens as part of the standard `shh --target pi` or `shh --target all` flow.
 
 ### Options
 
@@ -62,12 +94,14 @@ Components a target doesn't support are skipped with a note (e.g. `commands` on 
 
 ### What gets installed
 
-- `agents/`  → `<target>/agents/`  (default on; claude, cursor)
+- `agents/`  → `<target>/agents/`  (default on; claude, cursor, pi¹)
 - `commands/` → `<target>/commands/` (default on; claude only)
 - `rules/`   → `<target>/rules/`   (default on; claude, cursor, codex; preserves language subdirs)
 - `skills/`  → `<target>/skills/`  (`--with skills`; each `SKILL.md` dir linked; all targets)
 - `hooks.json` → `~/.claude/hooks.json` (`--with hooks`; claude only)
 - `mcp-servers.json` → `~/.claude/mcp-servers.json` (claude) / `~/.cursor/mcp.json` (cursor) (`--with mcp`)
+
+¹ pi agents are auto-generated from `agents/*.md` with pi-native frontmatter (see [pi agents](#pi-agents)).
 
 > **Adding a new harness:** add an entry to the `TARGETS` registry in `scripts/install.cjs` with its root path and supported component map.
 
